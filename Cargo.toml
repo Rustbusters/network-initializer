@@ -4,8 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-wg_2024 = { git = "http://github.com/WGL-2024/WGL_repo_2024.git", features = ["serialize"] }
+wg_2024 = { git = "https://github.com/WGL-2024/WGL_repo_2024.git", features = ["serialize"] }
 node = { git = "ssh://github.com/Rustbusters/node.git" }
 drone = { git = "ssh://github.com/Rustbusters/drone.git" }
 crossbeam-channel = "0.5.13"
 toml = "0.8.19"
+env_logger = "0.9"
+log = "0.4"

@@ -1,48 +1,158 @@
 use std::{fs, thread};
+use log::{debug, error, info, warn};
 use std::collections::HashMap;
-use std::sync::mpsc::{Receiver, Sender};
-use crossbeam_channel::unbounded;
+use crossbeam_channel::{unbounded, Receiver, Sender};
 use drone::RustBustersDrone;
 use wg_2024::config::Config;
 use wg_2024::controller::{DroneCommand, NodeEvent};
 use wg_2024::drone::{Drone, DroneOptions};
 use wg_2024::network::NodeId;
-use wg_2024::packet::Packet;
+use wg_2024::packet::{NodeType, Packet};
 
 fn main() {
+    env_logger::init();
+
+    // Vectors of thread initialized in this piece of code
+    let mut handles = Vec::new();
+
     let config_data = fs::read_to_string("input.toml").expect("Unable to read config file");
     let config: Config = toml::from_str(&config_data).expect("Unable to parse TOML");
 
-    // Senders and receivers used by the simulation controller to interact with
-    // all the drones and the hosts present in the simulation
-    let mut packet_senders = HashMap::<NodeId, Sender<Packet>>::new();
-    let mut packet_receivers = Vec::new();
-    let mut senders: Vec<Sender<DroneCommand>> = Vec::new();
-    let mut receivers: Vec<Receiver<NodeEvent>> = Vec::new();
+    // TODO: Check if input is well parsed
 
-    // For each node i create an isolated communication channel between
-    // this instance and the node instance
-    for id in 0.. {
-        let (packet_send, packet_recv) = unbounded();
-        packet_senders.insert(id as NodeId, packet_send);
-        packet_receivers.push(packet_recv);
+    // Initialize crossbeam channels for internal communication
+    let mut intra_node_channels: HashMap<NodeId, (Sender<Packet>, Receiver<Packet>)> = HashMap::new();
+    let mut simulation_controller_channels: HashMap<NodeId, (Sender<DroneCommand>, Receiver<NodeEvent>)> = HashMap::new();
+
+    // Crossbeam channels for each drone
+    info!("Installing communication for nodes");
+    for drone in &config.drone {
+        let (sender, receiver) = unbounded();
+        intra_node_channels.insert(drone.id, (sender, receiver));
     }
-    
-    let mut threads = Vec::new();
 
+    // Crossbeam channels for each client
+    for client in &config.client {
+        let (sender, receiver) = unbounded();
+        intra_node_channels.insert(client.id, (sender, receiver));
+    }
+
+    // Crossbeam channels for each server
+    for server in &config.server {
+        let (sender, receiver) = unbounded();
+        intra_node_channels.insert(server.id, (sender, receiver));
+    }
+
+    // Set up each drone
+    info!("Creating and spawning Drones");
     for drone in config.drone {
+        // Channels for communication between the drone and the simulation controller
+        let (controller_to_drone_sender, drone_from_controller_receiver) = unbounded();
+        let (drone_to_controller_sender, controller_from_drone_receiver) = unbounded();
+
+        simulation_controller_channels.insert(drone.id, (controller_to_drone_sender, controller_from_drone_receiver));
+
+        // Set the channels for the communication between the nodes
+        let packet_recv = intra_node_channels.get(&drone.id).unwrap().1.clone();
+        let mut packet_send = HashMap::new();
+
+        for neighbour in drone.connected_node_ids {
+            packet_send.insert(
+                neighbour,
+                intra_node_channels.get(&neighbour).unwrap().0.clone(),
+            );
+        }
+
+        // Create and spawn a new node
         let drone_options = DroneOptions {
             id: drone.id,
-            controller_send: ,
-            controller_recv: ,
-            packet_recv: ,
-            packet_send: ,
+            controller_send: drone_to_controller_sender,
+            controller_recv: drone_from_controller_receiver,
+            packet_recv,
+            packet_send,
             pdr: drone.pdr,
-        }
-        
+        };
+
         let handle = thread::spawn(move || {
             let mut drone = RustBustersDrone::new(drone_options);
             drone.run();
         });
+
+        handles.push(handle);
+    }
+
+    // TODO: implement initialization for clients and servers
+    info!("Creating and spawning Clients");
+    for client in config.client {
+        // TODO: update general host to client
+        // Channels for communication between the client and the simulation controller
+        let (controller_to_client_sender, client_from_controller_receiver) = unbounded();
+        let (client_to_controller_sender, controller_from_client_receiver) = unbounded();
+
+        simulation_controller_channels.insert(client.id, (controller_to_client_sender, controller_from_client_receiver));
+
+        // Set the channels for the communication between the nodes
+        let packet_recv = intra_node_channels.get(&client.id).unwrap().1.clone();
+        let mut packet_send = HashMap::new();
+
+        for neighbour in client.connected_drone_ids {
+            packet_send.insert(
+                neighbour,
+                intra_node_channels.get(&neighbour).unwrap().0.clone(),
+            );
+        }
+
+        // Create and spawn new clients
+        let handle = thread::spawn(move || {
+            let mut client = node::SimpleHost::new(
+                client.id,
+                NodeType::Client,
+                client_to_controller_sender,
+                client_from_controller_receiver,
+                packet_recv,
+                packet_send
+            );
+            client.run();
+        });
+        handles.push(handle);
+    }
+
+    info!("Creating and spawning Servers");
+    for server in config.server {
+        let (controller_to_server_sender, server_from_controller_receiver) = unbounded();
+        let (server_to_controller_sender, controller_from_server_receiver) = unbounded();
+
+        simulation_controller_channels.insert(server.id, (controller_to_server_sender, controller_from_server_receiver));
+
+        // Set the channels for the communication between the nodes
+        let packet_recv = intra_node_channels.get(&server.id).unwrap().1.clone();
+        let mut packet_send = HashMap::new();
+
+        for neighbour in server.connected_drone_ids {
+            packet_send.insert(
+                neighbour,
+                intra_node_channels.get(&neighbour).unwrap().0.clone(),
+            );
+        }
+
+        // Create and spawn new servers
+        let handle = thread::spawn(move || {
+            let mut server = node::SimpleHost::new(
+                server.id,
+                NodeType::Client,
+                server_to_controller_sender,
+                server_from_controller_receiver,
+                packet_recv,
+                packet_send
+            );
+            server.run();
+        });
+        handles.push(handle);
+    }
+
+    // Wait for all the childs to terminate before terminating the whole program
+    info!("Waiting the end of execution of the nodes");
+    for handle in handles {
+        handle.join().unwrap();
     }
 }
