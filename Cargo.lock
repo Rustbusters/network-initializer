@@ -367,7 +367,7 @@ dependencies = [
 [[package]]
 name = "simulation-controller"
 version = "0.1.0"
-source = "git+ssh://github.com/Rustbusters/simulation-controller.git#7e9eef8d01fe27181d7618b07e2023c9268194e4"
+source = "git+ssh://github.com/Rustbusters/simulation-controller.git#0956e12b9ac7bc6b55099da26952c6db1d48c23b"
 dependencies = [
  "crossbeam-channel",
  "drone 0.1.0 (git+ssh://git@github.com/Rustbusters/drone.git)",

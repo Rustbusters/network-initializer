@@ -158,24 +158,24 @@ fn main() {
     }
 
     // Create and start the simulation controller
-    // let params = simulation_controller::SimulationControllerParams {
-    //     handles,
-    //     communication_channels: simulation_controller_channels,
-    //     drone_ids,
-    //     client_ids,
-    //     server_ids
-    // };
-    //
-    // let mut sim_controller = simulation_controller::RustBustersSimulationController::new(params);
-    //
-    // sim_controller.start_simulation();
+    let params = simulation_controller::SimulationControllerParams {
+        handles,
+        communication_channels: simulation_controller_channels,
+        drone_ids,
+        client_ids,
+        server_ids
+    };
+
+    let mut sim_controller = simulation_controller::RustBustersSimulationController::new(params);
+
+    sim_controller.start_simulation();
 
     // Wait for all the childs to terminate before terminating the whole program
-    info!("Waiting the end of execution of the nodes");
-    for handle in handles {
-        match handle.join() {
-            Ok(_) => debug!("Successfully joined the nodes"),
-            Err(e) => error!("Failed to join the nodes: {:?}", e),
-        }
-    }
+    // info!("Waiting the end of execution of the nodes");
+    // for handle in handles {
+    //     match handle.join() {
+    //         Ok(_) => debug!("Successfully joined the nodes"),
+    //         Err(e) => error!("Failed to join the nodes: {:?}", e),
+    //     }
+    // }
 }
