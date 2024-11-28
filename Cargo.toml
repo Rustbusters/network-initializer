@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 wg_2024 = { git = "https://github.com/WGL-2024/WGL_repo_2024.git", features = ["serialize"] }
+simulation-controller = { git = "ssh://github.com/Rustbusters/simulation-controller.git" }
 node = { git = "ssh://github.com/Rustbusters/node.git" }
 drone = { git = "ssh://github.com/Rustbusters/drone.git" }
 crossbeam-channel = "0.5.13"

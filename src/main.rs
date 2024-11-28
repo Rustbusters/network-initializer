@@ -15,6 +15,10 @@ fn main() {
     // Vectors of thread initialized in this piece of code
     let mut handles = Vec::new();
 
+    let mut drone_ids: Vec<NodeId> = Vec::new();
+    let mut client_ids: Vec<NodeId> = Vec::new();
+    let mut server_ids: Vec<NodeId> = Vec::new();
+
     let config_data = fs::read_to_string("input.toml").expect("Unable to read config file");
     let config: Config = toml::from_str(&config_data).expect("Unable to parse TOML");
 
@@ -29,18 +33,21 @@ fn main() {
     for drone in &config.drone {
         let (sender, receiver) = unbounded();
         intra_node_channels.insert(drone.id, (sender, receiver));
+        drone_ids.push(drone.id);
     }
 
     // Crossbeam channels for each client
     for client in &config.client {
         let (sender, receiver) = unbounded();
         intra_node_channels.insert(client.id, (sender, receiver));
+        client_ids.push(client.id);
     }
 
     // Crossbeam channels for each server
     for server in &config.server {
         let (sender, receiver) = unbounded();
         intra_node_channels.insert(server.id, (sender, receiver));
+        server_ids.push(server.id);
     }
 
     // Set up each drone
@@ -150,9 +157,25 @@ fn main() {
         handles.push(handle);
     }
 
+    // Create and start the simulation controller
+    // let params = simulation_controller::SimulationControllerParams {
+    //     handles,
+    //     communication_channels: simulation_controller_channels,
+    //     drone_ids,
+    //     client_ids,
+    //     server_ids
+    // };
+    //
+    // let mut sim_controller = simulation_controller::RustBustersSimulationController::new(params);
+    //
+    // sim_controller.start_simulation();
+
     // Wait for all the childs to terminate before terminating the whole program
     info!("Waiting the end of execution of the nodes");
     for handle in handles {
-        handle.join().unwrap();
+        match handle.join() {
+            Ok(_) => debug!("Successfully joined the nodes"),
+            Err(e) => error!("Failed to join the nodes: {:?}", e),
+        }
     }
 }
