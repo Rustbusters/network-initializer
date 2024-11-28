@@ -52,7 +52,7 @@ checksum = "22ec99545bb0ed0ea7bb9b8e1e9122ea386ff8a48c0922e43f36d45ab09e0e80"
 [[package]]
 name = "drone"
 version = "0.1.0"
-source = "git+ssh://git@github.com/Rustbusters/drone.git#ff4e0f9db8ff0152cc28ace3ec38b4fb845fcd17"
+source = "git+ssh://git@github.com/Rustbusters/drone.git#3c882fffc4c5b43f920cfdf85cc628c0e9e8d906"
 dependencies = [
  "crossbeam-channel",
  "env_logger",
@@ -66,7 +66,7 @@ dependencies = [
 [[package]]
 name = "drone"
 version = "0.1.0"
-source = "git+ssh://github.com/Rustbusters/drone.git#ff4e0f9db8ff0152cc28ace3ec38b4fb845fcd17"
+source = "git+ssh://github.com/Rustbusters/drone.git#3c882fffc4c5b43f920cfdf85cc628c0e9e8d906"
 dependencies = [
  "crossbeam-channel",
  "env_logger",
@@ -179,7 +179,7 @@ dependencies = [
 [[package]]
 name = "node"
 version = "0.1.0"
-source = "git+ssh://git@github.com/Rustbusters/node.git#b87ad03c7cf57513c80fe0212251bba31bc90519"
+source = "git+ssh://git@github.com/Rustbusters/node.git#7a236d132535db2dac7f7152527507766dfbb5b9"
 dependencies = [
  "crossbeam-channel",
  "env_logger",
@@ -191,7 +191,7 @@ dependencies = [
 [[package]]
 name = "node"
 version = "0.1.0"
-source = "git+ssh://github.com/Rustbusters/node.git#b87ad03c7cf57513c80fe0212251bba31bc90519"
+source = "git+ssh://github.com/Rustbusters/node.git#7a236d132535db2dac7f7152527507766dfbb5b9"
 dependencies = [
  "crossbeam-channel",
  "env_logger",
@@ -367,7 +367,7 @@ dependencies = [
 [[package]]
 name = "simulation-controller"
 version = "0.1.0"
-source = "git+ssh://github.com/Rustbusters/simulation-controller.git#1d2cc7b0f81bd5437381b75bf7ac1488f55956f7"
+source = "git+ssh://github.com/Rustbusters/simulation-controller.git#7e9eef8d01fe27181d7618b07e2023c9268194e4"
 dependencies = [
  "crossbeam-channel",
  "drone 0.1.0 (git+ssh://git@github.com/Rustbusters/drone.git)",
