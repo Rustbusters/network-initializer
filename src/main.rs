@@ -160,6 +160,7 @@ fn main() {
     // Create and start the simulation controller
     let params = simulation_controller::SimulationControllerParams {
         handles,
+        node_channels: intra_node_channels,
         communication_channels: simulation_controller_channels,
         drone_ids,
         client_ids,
