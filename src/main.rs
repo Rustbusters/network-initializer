@@ -56,7 +56,7 @@ fn main() {
 
     // Set up each drone
     info!("Creating and spawning Drones");
-    for drone in config.drone {
+    for drone in config.drone.clone() {
         // Channels for communication between the drone and the simulation controller
         let (controller_to_drone_sender, drone_from_controller_receiver) = unbounded();
         let (drone_to_controller_sender, controller_from_drone_receiver) = unbounded();
@@ -97,7 +97,7 @@ fn main() {
 
     // TODO: implement initialization for clients and servers
     info!("Creating and spawning Clients");
-    for client in config.client {
+    for client in config.client.clone() {
         // TODO: update general host to client
         // Channels for communication between the client and the simulation controller
         let (controller_to_client_sender, client_from_controller_receiver) = unbounded();
@@ -135,7 +135,7 @@ fn main() {
     }
 
     info!("Creating and spawning Servers");
-    for server in config.server {
+    for server in config.server.clone() {
         let (controller_to_server_sender, server_from_controller_receiver) = unbounded();
         let (server_to_controller_sender, controller_from_server_receiver) = unbounded();
 
@@ -175,14 +175,22 @@ fn main() {
         handles,
         node_channels: intra_node_channels,
         communication_channels: simulation_controller_channels,
-        drone_ids,
-        client_ids,
-        server_ids,
+        drones: config.drone.clone(),
+        clients:  config.client.clone(),
+        servers:  config.server.clone(),
     };
 
     let sim_controller = simulation_controller::RustBustersSimulationController::new(params);
 
-    sim_controller.start();
+    // CLI option
+    let mut cli = simulation_controller::SimulationControllerCLI::new(sim_controller);
+    cli.run();
+
+    // GUI Option
+    // match simulation_controller::run(sim_controller){
+    //     Ok(_) => (),
+    //     Err(error) => panic!("Unable to run simulation: {}", error),
+    // }
 
     // Wait for all the childs to terminate before terminating the whole program
     // info!("Waiting the end of execution of the nodes");
