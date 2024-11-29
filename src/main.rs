@@ -1,8 +1,8 @@
-use std::{fs, thread};
-use log::{debug, error, info, warn};
-use std::collections::HashMap;
 use crossbeam_channel::{unbounded, Receiver, Sender};
 use drone::RustBustersDrone;
+use log::info;
+use std::collections::HashMap;
+use std::{fs, thread};
 use wg_2024::config::Config;
 use wg_2024::controller::{DroneCommand, NodeEvent};
 use wg_2024::drone::{Drone, DroneOptions};
@@ -25,8 +25,12 @@ fn main() {
     // TODO: Check if input is well parsed
 
     // Initialize crossbeam channels for internal communication
-    let mut intra_node_channels: HashMap<NodeId, (Sender<Packet>, Receiver<Packet>)> = HashMap::new();
-    let mut simulation_controller_channels: HashMap<NodeId, (Sender<DroneCommand>, Receiver<NodeEvent>)> = HashMap::new();
+    let mut intra_node_channels: HashMap<NodeId, (Sender<Packet>, Receiver<Packet>)> =
+        HashMap::new();
+    let mut simulation_controller_channels: HashMap<
+        NodeId,
+        (Sender<DroneCommand>, Receiver<NodeEvent>),
+    > = HashMap::new();
 
     // Crossbeam channels for each drone
     info!("Installing communication for nodes");
@@ -57,7 +61,10 @@ fn main() {
         let (controller_to_drone_sender, drone_from_controller_receiver) = unbounded();
         let (drone_to_controller_sender, controller_from_drone_receiver) = unbounded();
 
-        simulation_controller_channels.insert(drone.id, (controller_to_drone_sender, controller_from_drone_receiver));
+        simulation_controller_channels.insert(
+            drone.id,
+            (controller_to_drone_sender, controller_from_drone_receiver),
+        );
 
         // Set the channels for the communication between the nodes
         let packet_recv = intra_node_channels.get(&drone.id).unwrap().1.clone();
@@ -96,7 +103,10 @@ fn main() {
         let (controller_to_client_sender, client_from_controller_receiver) = unbounded();
         let (client_to_controller_sender, controller_from_client_receiver) = unbounded();
 
-        simulation_controller_channels.insert(client.id, (controller_to_client_sender, controller_from_client_receiver));
+        simulation_controller_channels.insert(
+            client.id,
+            (controller_to_client_sender, controller_from_client_receiver),
+        );
 
         // Set the channels for the communication between the nodes
         let packet_recv = intra_node_channels.get(&client.id).unwrap().1.clone();
@@ -117,7 +127,7 @@ fn main() {
                 client_to_controller_sender,
                 client_from_controller_receiver,
                 packet_recv,
-                packet_send
+                packet_send,
             );
             client.run();
         });
@@ -129,7 +139,10 @@ fn main() {
         let (controller_to_server_sender, server_from_controller_receiver) = unbounded();
         let (server_to_controller_sender, controller_from_server_receiver) = unbounded();
 
-        simulation_controller_channels.insert(server.id, (controller_to_server_sender, controller_from_server_receiver));
+        simulation_controller_channels.insert(
+            server.id,
+            (controller_to_server_sender, controller_from_server_receiver),
+        );
 
         // Set the channels for the communication between the nodes
         let packet_recv = intra_node_channels.get(&server.id).unwrap().1.clone();
@@ -150,7 +163,7 @@ fn main() {
                 server_to_controller_sender,
                 server_from_controller_receiver,
                 packet_recv,
-                packet_send
+                packet_send,
             );
             server.run();
         });
@@ -164,12 +177,12 @@ fn main() {
         communication_channels: simulation_controller_channels,
         drone_ids,
         client_ids,
-        server_ids
+        server_ids,
     };
 
-    let mut sim_controller = simulation_controller::RustBustersSimulationController::new(params);
+    let sim_controller = simulation_controller::RustBustersSimulationController::new(params);
 
-    sim_controller.start_simulation();
+    sim_controller.start();
 
     // Wait for all the childs to terminate before terminating the whole program
     // info!("Waiting the end of execution of the nodes");

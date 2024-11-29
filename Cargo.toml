@@ -8,8 +8,8 @@ wg_2024 = { git = "https://github.com/WGL-2024/WGL_repo_2024.git", features = ["
 simulation-controller = { git = "ssh://github.com/Rustbusters/simulation-controller.git" }
 node = { git = "ssh://github.com/Rustbusters/node.git" }
 #node = { path = "../node" }
-drone = { git = "ssh://github.com/Rustbusters/drone.git" }
-#drone = { path = "../drone" }
+#drone = { git = "ssh://github.com/Rustbusters/drone.git" }
+drone = { path = "../drone" }
 crossbeam-channel = "0.5.13"
 toml = "0.8.19"
 env_logger = "0.9"
