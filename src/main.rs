@@ -185,7 +185,6 @@ fn main() {
     };
 
     let sim_controller = RustBustersSimulationController::new(params);
-    RustBustersSimulationController::listen(drone_controller_channels.clone(), client_controller_channels.clone(), server_controller_channels.clone());
 
     // CLI option
     let mut cli = simulation_controller::SimulationControllerCLI::new(sim_controller);
