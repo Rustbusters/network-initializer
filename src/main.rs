@@ -1,11 +1,11 @@
 use crossbeam_channel::{unbounded, Receiver, Sender};
 use drone::RustBustersDrone;
 use log::info;
+use node::commands::HostCommand;
+use node::SimpleHost;
+use simulation_controller::RustBustersSimulationController;
 use std::collections::HashMap;
 use std::{fs, thread};
-use node::SimpleHost;
-use node::commands::HostCommand;
-use simulation_controller::RustBustersSimulationController;
 use wg_2024::config::Config;
 use wg_2024::controller::{DroneCommand, NodeEvent};
 use wg_2024::drone::{Drone, DroneOptions};
@@ -30,9 +30,18 @@ fn main() {
     // Initialize crossbeam channels for internal communication
     let mut intra_node_channels: HashMap<NodeId, (Sender<Packet>, Receiver<Packet>)> =
         HashMap::new();
-    let mut drone_controller_channels: HashMap<NodeId, (Sender<DroneCommand>, Receiver<NodeEvent>)> = HashMap::new();
-    let mut client_controller_channels: HashMap<NodeId, (Sender<HostCommand>, Receiver<NodeEvent>)> = HashMap::new();
-    let mut server_controller_channels: HashMap<NodeId, (Sender<HostCommand>, Receiver<NodeEvent>)> = HashMap::new();
+    let mut drone_controller_channels: HashMap<
+        NodeId,
+        (Sender<DroneCommand>, Receiver<NodeEvent>),
+    > = HashMap::new();
+    let mut client_controller_channels: HashMap<
+        NodeId,
+        (Sender<HostCommand>, Receiver<NodeEvent>),
+    > = HashMap::new();
+    let mut server_controller_channels: HashMap<
+        NodeId,
+        (Sender<HostCommand>, Receiver<NodeEvent>),
+    > = HashMap::new();
 
     // Crossbeam channels for each drone
     info!("Installing communication for nodes");
@@ -180,12 +189,11 @@ fn main() {
         client_controller_channels: client_controller_channels.clone(),
         server_controller_channels: server_controller_channels.clone(),
         drones: config.drone.clone(),
-        clients:  config.client.clone(),
-        servers:  config.server.clone(),
+        clients: config.client.clone(),
+        servers: config.server.clone(),
     };
 
     let sim_controller = RustBustersSimulationController::new(params);
-    RustBustersSimulationController::listen(drone_controller_channels.clone(), client_controller_channels.clone(), server_controller_channels.clone());
 
     // CLI option
     let mut cli = simulation_controller::SimulationControllerCLI::new(sim_controller);
