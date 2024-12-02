@@ -170,7 +170,7 @@ fn main() {
         let handle = thread::spawn(move || {
             let mut server = SimpleHost::new(
                 server.id,
-                NodeType::Client,
+                NodeType::Server,
                 server_to_controller_sender,
                 server_from_controller_receiver,
                 packet_recv,
