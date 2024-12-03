@@ -1,13 +1,13 @@
 use crossbeam_channel::{unbounded, Receiver, Sender};
 use drone::RustBustersDrone;
 use log::info;
-use node::commands::HostCommand;
+use node::commands::{HostCommand, HostEvent};
 use node::SimpleHost;
 use simulation_controller::RustBustersSimulationController;
 use std::collections::HashMap;
 use std::{fs, thread};
 use wg_2024::config::Config;
-use wg_2024::controller::{DroneCommand, NodeEvent};
+use wg_2024::controller::{DroneCommand, DroneEvent};
 use wg_2024::drone::Drone;
 use wg_2024::network::NodeId;
 use wg_2024::packet::{NodeType, Packet};
@@ -32,15 +32,15 @@ fn main() {
         HashMap::new();
     let mut drone_controller_channels: HashMap<
         NodeId,
-        (Sender<DroneCommand>, Receiver<NodeEvent>),
+        (Sender<DroneCommand>, Receiver<DroneEvent>),
     > = HashMap::new();
     let mut client_controller_channels: HashMap<
         NodeId,
-        (Sender<HostCommand>, Receiver<NodeEvent>),
+        (Sender<HostCommand>, Receiver<HostEvent>),
     > = HashMap::new();
     let mut server_controller_channels: HashMap<
         NodeId,
-        (Sender<HostCommand>, Receiver<NodeEvent>),
+        (Sender<HostCommand>, Receiver<HostEvent>),
     > = HashMap::new();
 
     // Crossbeam channels for each drone
