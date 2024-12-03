@@ -8,7 +8,7 @@ use std::collections::HashMap;
 use std::{fs, thread};
 use wg_2024::config::Config;
 use wg_2024::controller::{DroneCommand, NodeEvent};
-use wg_2024::drone::{Drone, DroneOptions};
+use wg_2024::drone::Drone;
 use wg_2024::network::NodeId;
 use wg_2024::packet::{NodeType, Packet};
 
@@ -88,18 +88,15 @@ fn main() {
             );
         }
 
-        // Create and spawn a new node
-        let drone_options = DroneOptions {
-            id: drone.id,
-            controller_send: drone_to_controller_sender,
-            controller_recv: drone_from_controller_receiver,
-            packet_recv,
-            packet_send,
-            pdr: drone.pdr,
-        };
-
         let handle = thread::spawn(move || {
-            let mut drone = RustBustersDrone::new(drone_options);
+            let mut drone = RustBustersDrone::new(
+                drone.id,
+                drone_to_controller_sender,
+                drone_from_controller_receiver,
+                packet_recv,
+                packet_send,
+                drone.pdr,
+            );
             drone.run();
         });
 
