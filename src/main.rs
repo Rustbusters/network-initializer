@@ -1,8 +1,9 @@
+use client::RustbustersClient;
+use common_utils::{HostCommand, HostEvent};
 use crossbeam_channel::{unbounded, Receiver, Sender};
-use drone::RustBustersDrone;
 use log::info;
-use node::commands::{HostCommand, HostEvent};
 use node::SimpleHost;
+use rustbusters_drone::RustBustersDrone;
 use simulation_controller::RustBustersSimulationController;
 use std::collections::HashMap;
 use std::{fs, thread};
@@ -106,7 +107,6 @@ fn main() {
     // TODO: implement initialization for clients and servers
     info!("Creating and spawning Clients");
     for client in config.client.clone() {
-        // TODO: update general host to client
         // Channels for communication between the client and the simulation controller
         let (controller_to_client_sender, client_from_controller_receiver) = unbounded();
         let (client_to_controller_sender, controller_from_client_receiver) = unbounded();
@@ -129,9 +129,8 @@ fn main() {
 
         // Create and spawn new clients
         let handle = thread::spawn(move || {
-            let mut client = SimpleHost::new(
+            let mut client = RustbustersClient::new(
                 client.id,
-                NodeType::Client,
                 client_to_controller_sender,
                 client_from_controller_receiver,
                 packet_recv,
@@ -144,6 +143,7 @@ fn main() {
 
     info!("Creating and spawning Servers");
     for server in config.server.clone() {
+        // TODO: update general host to server
         let (controller_to_server_sender, server_from_controller_receiver) = unbounded();
         let (server_to_controller_sender, controller_from_server_receiver) = unbounded();
 
