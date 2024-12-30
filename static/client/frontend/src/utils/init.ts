@@ -17,15 +17,15 @@ export async function initialize() {
     initializeTheme();
 
     try {
-        const response = await fetch('/api/threads');
-        const threads = await response.json();
-        threads.sort();
+        const response = await fetch('/api/clients');
+        const active_clients = await response.json();
+        active_clients.sort();
 
-        threads.forEach((clientId: number) => {
+        active_clients.forEach((clientId: number) => {
 			displayedChats.set(new Set([...get(displayedChats), clientId]));
         });
     } catch (error) {
-        console.error('Error loading threads:', error);
+        console.error('Error loading active_clients:', error);
     }
 
     // Inizializza WebSocket

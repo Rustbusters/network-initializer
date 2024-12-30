@@ -47,12 +47,6 @@ export function initializeWebSocket() {
             return;
         }
 
-        // Gestione nuovo thread
-        if (data.type === 'new_thread') {
-            activeUsers.update(chats => new Set([...chats, data.thread_id]));
-            return;
-        }
-
         // Gestione messaggio normale
         if (data.sender_id && get(activeUsers).has(data.receiver_id)) {
             let key: string = serializeKey(data.receiver_id, data.sender_id);

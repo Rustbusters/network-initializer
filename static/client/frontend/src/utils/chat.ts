@@ -10,7 +10,7 @@ export async function sendMessage(
 
     const message: Message = {
         content,
-        timestamp: new Date().toLocaleDateString(),
+        timestamp: new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }),
         sender_id: senderId,
         receiver_id: receiverId,
     };
