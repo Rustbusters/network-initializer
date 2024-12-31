@@ -1,4 +1,5 @@
-import { messages, serializeKey } from "../stores/store";
+import { messages, serializeKey, registrationStatus } from "../stores/store";
+import { get } from "svelte/store";
 import type { Message } from "../types/message";
 
 export async function sendMessage(
@@ -8,11 +9,19 @@ export async function sendMessage(
 ) {
     if (!content) return;
 
+    const serverId = get(registrationStatus)[senderId];
+    const timestamp = new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    
+    const messageContent = content instanceof Uint8Array
+        ? { type: 'Image' as const, data: content }
+        : { type: 'Text' as const, data: content };
+
     const message: Message = {
-        content,
-        timestamp: new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }),
+        content: messageContent,
+        timestamp,
         sender_id: senderId,
         receiver_id: receiverId,
+        server_id: serverId
     };
 
     try {

@@ -20,7 +20,11 @@
                 ? 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-bl-none'
                 : 'bg-blue-500 text-white rounded-br-none'} shadow-sm break-words whitespace-pre-wrap overflow-hidden"
         >
-            {message.content}
+            {#if message.content.type === "Text"}
+                {message.content.data}
+            {:else}
+                TODO: IMAGES
+            {/if}
         </div>
         <div
             class="flex items-center {isReceived

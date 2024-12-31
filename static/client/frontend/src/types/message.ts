@@ -1,6 +1,9 @@
+import type { MessageContent } from "./websocket";
+
 export interface Message {
     sender_id: number;
     receiver_id: number;
-    content: string | Uint8Array;
+    server_id: number;
+    content: MessageContent;
     timestamp: string;
 }

@@ -1,6 +1,6 @@
 import { get } from "svelte/store";
 import { displayedChats } from "../stores/store";
-import { initializeWebSocket } from "./ws";
+import { initializeWebSocket } from "./websocket/main";
 
 // Inizializzazione tema
 function initializeTheme() {

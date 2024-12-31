@@ -1,41 +1,70 @@
 <script lang="ts">
-    import {reachableUsers} from "../stores/store";
+    import { clientUsers, initializeClientUsers, setRefreshing } from "../stores/users";
     import ChatBox from "./ChatBox.svelte";
-    import {CircleUserRound} from "lucide-svelte";
+    import { CircleUserRound, LoaderCircle } from "lucide-svelte"; // Cambiamo RefreshCw con Loader
+    import { onMount } from "svelte";
+    import { requestRegisteredUsers } from "../utils/users";
 
     interface Props {
         clientId: number;
         destinationId: number;
     }
 
-    let {clientId, destinationId = $bindable(-1)}: Props = $props();
+    let { clientId, destinationId = $bindable(-1) }: Props = $props();
+
+    onMount(() => {
+        initializeClientUsers(clientId);
+        requestRegisteredUsers(clientId);
+    });
+
+    async function refreshUsers() {
+        setRefreshing(clientId, true);
+        await requestRegisteredUsers(clientId);
+    }
 </script>
 
 <div class="flex w-full">
-    <div
-            class="w-52 bg-white dark:bg-gray-800 border-r border-gray-300 dark:border-gray-700 overflow-hidden"
-    >
+    <div class="w-52 bg-white dark:bg-gray-800 border-r border-gray-300 dark:border-gray-700 overflow-hidden">
+        <div class="p-2 border-b border-gray-300 dark:border-gray-700">
+            <button
+                class="w-full px-3 py-2 flex items-center justify-center gap-2 text-sm
+                       bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-500
+                       rounded-lg transition-colors text-gray-800 dark:text-white"
+                onclick={refreshUsers}
+            >
+                <span>Refresh Users</span>
+                {#if $clientUsers[clientId]?.isRefreshing}
+                    <LoaderCircle class="size-4 animate-spin"/>
+                {/if}
+            </button>
+        </div>
         <div class="px-3 py-2">
-            <div class="space-y-2">
-                {#each $reachableUsers as id}
-                    <button
+            {#if $clientUsers[clientId]?.isLoading}
+                <div class="flex justify-center py-4">
+                    <div class="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+            {:else}
+                <div class="space-y-2">
+                    {#each $clientUsers[clientId]?.users || [] as user}
+                        <button
                             class="w-full p-2 rounded cursor-pointer transition-colors flex items-center gap-2
-                               {destinationId === id 
-                                   ? 'bg-blue-100 dark:bg-blue-900' 
-                                   : 'hover:bg-gray-100 dark:hover:bg-gray-700'}"
-                            onclick={() => destinationId = id}
-                    >
-                        <CircleUserRound class="size-5 {destinationId === id 
-                            ? 'text-blue-600 dark:text-blue-400' 
-                            : 'text-gray-600 dark:text-gray-300'}"/>
-                        <span class="{destinationId === id 
-                            ? 'text-blue-600 dark:text-blue-400 font-medium' 
-                            : 'text-gray-800 dark:text-gray-100'}">
-                            Client {id}
-                        </span>
-                    </button>
-                {/each}
-            </div>
+                                   {destinationId === user.id 
+                                       ? 'bg-blue-100 dark:bg-blue-900' 
+                                       : 'hover:bg-gray-100 dark:hover:bg-gray-700'}"
+                            onclick={() => destinationId = user.id}
+                        >
+                            <CircleUserRound class="size-5 {destinationId === user.id 
+                                ? 'text-blue-600 dark:text-blue-400' 
+                                : 'text-gray-600 dark:text-gray-300'}"/>
+                            <span class="{destinationId === user.id 
+                                ? 'text-blue-600 dark:text-blue-400 font-medium' 
+                                : 'text-gray-800 dark:text-gray-100'}">
+                                {user.name}
+                            </span>
+                        </button>
+                    {/each}
+                </div>
+            {/if}
         </div>
     </div>
 

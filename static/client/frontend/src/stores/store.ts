@@ -23,3 +23,12 @@ export const reachableUsers = writable<number[]>([1, 2, 3, 4, 5]);
 // Variable to store the registration status of the user
 // key: user_id, value: server_id (-1 if not registered)
 export const registrationStatus = writable<Record<number, number>>({});
+
+// Variable to store pending registrations
+export const pendingRegistrations = writable<Set<number>>(new Set());
+
+// Variable to store the disconnection status
+export const isDisconnecting = writable<Record<number, boolean>>({});
+
+// Variable to store pending unregistrations
+export const pendingUnregistrations = writable<Set<number>>(new Set());

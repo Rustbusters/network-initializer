@@ -1,10 +1,10 @@
 <script lang="ts">
-    import { MessageSquare, Moon, Sun } from "lucide-svelte";
+    import { LoaderCircle, MessageSquare, Moon, Sun } from "lucide-svelte";
     import { onMount } from "svelte";
     import Chat from "./lib/Chat.svelte";
     import { displayedChats } from "./stores/store";
     import { initialize } from "./utils/init";
-    import { attemptReconnect, connectionStatus } from "./utils/ws";
+    import { attemptReconnect, connectionStatus } from "./utils/websocket/main";
 
     let loading = $state(true);
 
@@ -114,9 +114,7 @@
         <div
             class="text-center flex flex-col gap-4 items-center justify-center"
         >
-            <div
-                class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"
-            ></div>
+            <LoaderCircle class="w-16 h-16 text-blue-500 animate-spin mb-4" />
             <p class="text-gray-600 dark:text-gray-300">
                 Loading chats...
             </p>
