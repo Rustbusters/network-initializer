@@ -7,7 +7,7 @@
     interface Props {
         clientId: number;
     }
-    let { clientId } = $props();
+    let { clientId }: Props = $props();
 
     let availableServers: number[] = $state([]);
     let showModal = $state(false);
@@ -21,6 +21,7 @@
     // svelte-ignore non_reactive_update
     let usernameInput: HTMLInputElement;
 
+    // Fetch available servers from API
     async function fetchServers() {
         isRefreshing = true;
         try {
@@ -31,6 +32,7 @@
             console.error(e);
             availableServers = [1, 2, 3];
         } finally {
+            // Ensure minimum animation duration
             setTimeout(() => {
                 isRefreshing = false;
             }, 600); // Minimo tempo di animazione
@@ -47,6 +49,7 @@
         }
     });
 
+    // Handle server registration process
     async function handleRegistration() {
         try {
             const response = await fetch("/api/register", {

@@ -1,7 +1,7 @@
 <script lang="ts">
     import { clientUsers, initializeClientUsers, setRefreshing } from "../stores/users";
     import ChatBox from "./ChatBox.svelte";
-    import { CircleUserRound, LoaderCircle } from "lucide-svelte"; // Cambiamo RefreshCw con Loader
+    import { CircleUserRound, LoaderCircle } from "lucide-svelte";
     import { onMount } from "svelte";
     import { requestRegisteredUsers } from "../utils/users";
 
@@ -12,11 +12,13 @@
 
     let { clientId, destinationId = $bindable(-1) }: Props = $props();
 
+    // Initialize users list and request registered users on component mount
     onMount(() => {
         initializeClientUsers(clientId);
         requestRegisteredUsers(clientId);
     });
 
+    // Refresh users list from server
     async function refreshUsers() {
         setRefreshing(clientId, true);
         await requestRegisteredUsers(clientId);

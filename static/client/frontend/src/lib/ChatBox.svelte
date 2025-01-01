@@ -19,22 +19,27 @@
 
     // svelte-ignore non_reactive_update
     let chatBox: HTMLDivElement;
+
+    // Track if chat is scrolled to bottom
     let isAtBottom = true;
 
     let showToast = $state(false);
     let toastMessage = $state("");
     let toastId = $state(0);
 
+    // Derived messages for current chat
     let chatMessages: Msg[] = $derived(
         $messages[serializeKey(clientId, destinationId)] || []
     );
 
+    // Auto-scroll to bottom when new messages arrive
     const scrollToBottom = () => {
         if (chatBox) {
             chatBox.scrollTop = chatBox.scrollHeight;
         }
     };
 
+    // Check if user has scrolled away from bottom
     const checkScroll = () => {
         if (!chatBox) return;
         const threshold = 1;
@@ -76,6 +81,7 @@
         }
     }
 
+    // Handle emoji insertion maintaining cursor position
     function handleEmoji(emoji: string) {
         const cursorPos = inputElement?.selectionStart ?? inputValue.length;
         inputValue =

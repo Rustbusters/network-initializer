@@ -17,12 +17,10 @@
 </script>
 
 <div class="container mx-auto p-4 lg:p-6">
-    <!-- Header principale -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
         <div
             class="flex flex-col sm:flex-row justify-between items-center gap-4"
         >
-            <!-- Logo e titolo -->
             <div class="flex items-center gap-3">
                 <div class="bg-blue-500 p-2 rounded-lg">
                     <MessageSquare class="size-5 text-white" />
@@ -39,9 +37,9 @@
                 </div>
             </div>
 
-            <!-- Controlli e stato -->
+            <!-- Controls and status -->
             <div class="flex items-center gap-6">
-                <!-- Indicatore di stato -->
+                <!-- Connection status indicator -->
                 <div class="flex items-center gap-2">
                     <div class="relative">
                         <div
@@ -63,12 +61,12 @@
                             onclick={attemptReconnect}
                             class="ml-2 px-2 py-1 text-xs bg-blue-500 hover:bg-blue-600 text-white rounded transition-colors duration-200"
                         >
-                            Riconnetti
+                            Reconnect
                         </button>
                     {/if}
                 </div>
 
-                <!-- Separatore -->
+                <!-- Divider -->
                 <div class="h-8 w-px bg-gray-200 dark:bg-gray-700"></div>
 
                 <!-- Theme Toggle -->
@@ -99,7 +97,7 @@
         </div>
     </div>
 
-    <!-- Container per la griglia di chat (verrà popolato da JavaScript) -->
+    <!-- Chat grid container (populated dynamically) -->
     <div id="chat-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         {#each $displayedChats as chatId}
             <Chat clientId={chatId} />
@@ -107,6 +105,7 @@
     </div>
 </div>
 
+<!-- Loading overlay -->
 {#if loading}
     <div
         class="fixed inset-0 bg-white dark:bg-gray-900 flex items-center justify-center z-50 transition-opacity duration-500"
