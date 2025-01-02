@@ -32,3 +32,6 @@ export const isDisconnecting = writable<Record<number, boolean>>({});
 
 // Variable to store pending unregistrations
 export const pendingUnregistrations = writable<Set<number>>(new Set());
+
+// Variable to store client usernames
+export const clientUsernames = writable<Record<number, string>>({});

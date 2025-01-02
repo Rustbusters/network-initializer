@@ -2,6 +2,7 @@ import {get} from "svelte/store";
 import {setUsers} from "../../stores/users";
 import {
     displayedChats as activeUsers,
+    clientUsernames,
     isDisconnecting,
     messages,
     pendingRegistrations,
@@ -33,6 +34,10 @@ export function handleMessage(wsMessage: WebSocketMessage) {
                 set.delete(wsMessage.client_id);
                 return set;
             });
+            clientUsernames.update((usernames) => {
+                const {[wsMessage.client_id]: _, ...rest} = usernames;
+                return rest;
+            });
             break;
 
         case "UnregisterSuccess":
@@ -50,6 +55,10 @@ export function handleMessage(wsMessage: WebSocketMessage) {
                 pendingUnregistrations.update(set => {
                     set.delete(wsMessage.client_id);
                     return set;
+                });
+                clientUsernames.update((usernames) => {
+                    const {[wsMessage.client_id]: _, ...rest} = usernames;
+                    return rest;
                 });
             }
             break;

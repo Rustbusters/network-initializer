@@ -70,7 +70,7 @@
         bind:this={dropdownRef}
         class="emoji-dropdown {open
             ? 'grid'
-            : 'hidden'} absolute bottom-full right-0 mb-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-2 grid-cols-5 gap-2"
+            : 'hidden'} select-none absolute bottom-full right-0 mb-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-2 grid-cols-5 gap-2"
     >
         {#each emojiList as emoji}
             <button

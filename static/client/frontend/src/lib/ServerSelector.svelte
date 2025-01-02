@@ -1,7 +1,7 @@
 <script lang="ts">
     import { LoaderCircle } from "lucide-svelte";
     import { onMount } from "svelte";
-    import { pendingRegistrations } from "../stores/store";
+    import { pendingRegistrations, clientUsernames } from "../stores/store";
     import Toast from "./Toast.svelte";
 
     interface Props {
@@ -66,6 +66,10 @@
 
             if (response.ok) {
                 showModal = false;
+                clientUsernames.update(usernames => ({
+                    ...usernames,
+                    [clientId]: username
+                }));
                 username = "";
                 pendingRegistrations.update((set) => {
                     set.add(clientId);

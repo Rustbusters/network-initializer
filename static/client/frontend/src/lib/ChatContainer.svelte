@@ -4,6 +4,7 @@
     import { CircleUserRound, LoaderCircle } from "lucide-svelte";
     import { onMount } from "svelte";
     import { requestRegisteredUsers } from "../utils/users";
+    import ImageViewer from "./ImageViewer.svelte";
 
     interface Props {
         clientId: number;
@@ -23,6 +24,8 @@
         setRefreshing(clientId, true);
         await requestRegisteredUsers(clientId);
     }
+
+    let activeImage = $state<string | null>(null);
 </script>
 
 <div class="flex w-full">
@@ -71,7 +74,20 @@
     </div>
 
     {#if destinationId !== -1}
-        <ChatBox {clientId} {destinationId}/>
+        <div class="relative flex-1">
+            <ChatBox 
+                {clientId} 
+                {destinationId} 
+                onImageClick={(src) => activeImage = src}
+            />
+            
+            {#if activeImage}
+                <ImageViewer 
+                    src={activeImage} 
+                    onClose={() => activeImage = null}
+                />
+            {/if}
+        </div>
     {:else}
         <div class="flex items-center justify-center w-full h-[450px]">
             <p class="text-gray-500 dark:text-gray-400">

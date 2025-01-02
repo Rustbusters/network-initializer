@@ -1,12 +1,14 @@
 <script lang="ts">
+    // Rimuovi l'import di ImageViewer
     import type { Message } from "../types/message";
 
     interface Props {
         message: Message;
         isReceived: boolean;
+        onImageClick?: (src: string) => void;
     }
 
-    let { message, isReceived }: Props = $props();
+    let { message, isReceived, onImageClick }: Props = $props();
 </script>
 
 <div class="flex {isReceived ? 'justify-start' : 'justify-end'} animate-fadeIn">
@@ -28,8 +30,9 @@
                 <img 
                     src={message.content.data}
                     alt="Sent img"
-                    class="w-full h-auto rounded-xl object-cover"
+                    class="w-full h-auto rounded-xl object-cover cursor-pointer hover:opacity-90 transition-opacity"
                     loading="lazy"
+                    onclick={() => onImageClick?.(message.content.data)}
                 />
             </div>
         {/if}

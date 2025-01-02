@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { CircleUserRound, Paperclip, Send, X } from "lucide-svelte";
+    import { CircleUserRound, LoaderCircle, Paperclip, Send, X } from "lucide-svelte";
     import { messages, serializeKey } from "../stores/store";
     import { type Message as Msg } from "../types/message";
     import { sendMessage } from "../utils/chat";
@@ -13,9 +13,10 @@
     interface Props {
         clientId: number;
         destinationId: number;
+        onImageClick?: (src: string) => void;
     }
 
-    let { clientId, destinationId }: Props = $props();
+    let { clientId, destinationId, onImageClick }: Props = $props();
 
     let inputElement: HTMLInputElement | undefined = $state();
     let inputValue = $state("");
@@ -85,6 +86,7 @@
     let imageData: string | null = $state(null);
     let imagePreview: string | null = $state(null);
     let fileInput: HTMLInputElement;
+    let isSendingImage = $state(false);
 
     async function handleImageSelect(event: Event) {
         const input = event.target as HTMLInputElement;
@@ -119,9 +121,11 @@
 
         try {
             if (imageData) {
+                isSendingImage = true;
                 await sendMessage(clientId, destinationId, imageData, "Image");
                 imageData = null;
                 imagePreview = null;
+                isSendingImage = false;
             }
 
             if (inputValue.trim()) {
@@ -134,6 +138,7 @@
 
             isAtBottom = true;
         } catch (error) {
+            isSendingImage = false;
             console.error(error);
             toastMessage = "Failed to send message. Please try again.";
             toastId++;
@@ -196,7 +201,11 @@
         class="chat-box flex-1 overflow-y-auto space-y-4 p-4 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700"
     >
         {#each chatMessages as msg}
-            <Message message={msg} isReceived={msg.sender_id !== clientId} />
+            <Message 
+                message={msg} 
+                isReceived={msg.sender_id !== clientId}
+                onImageClick={onImageClick}
+            />
         {/each}
     </div>
 
@@ -208,14 +217,20 @@
                 <img
                     src={imagePreview}
                     alt="Preview"
-                    class="max-h-48 rounded-lg"
+                    class="max-h-48 rounded-lg {isSendingImage ? 'opacity-50' : ''}"
                 />
-                <button
-                    onclick={cancelImage}
-                    class="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                >
-                    <X class="size-4" />
-                </button>
+                {#if isSendingImage}
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <LoaderCircle class="size-8 text-blue-500 animate-spin" />
+                    </div>
+                {:else}
+                    <button
+                        onclick={cancelImage}
+                        class="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                    >
+                        <X class="size-4" />
+                    </button>
+                {/if}
             </div>
         </div>
     {/if}
