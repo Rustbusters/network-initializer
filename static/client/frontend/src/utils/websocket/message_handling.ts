@@ -88,7 +88,7 @@ export function handleMessage(wsMessage: WebSocketMessage) {
                         [key]: [
                             ...newMessages,
                             {
-                                content: message.message.message,
+                                content: message.message.content,
                                 timestamp: message.message.timestamp,
                                 sender_id: message.sender_id,
                                 receiver_id: wsMessage.client_id,

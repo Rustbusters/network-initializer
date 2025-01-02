@@ -7,11 +7,11 @@ export interface User {
 
 export type MessageContent =
     | { type: "Text"; data: string }
-    | { type: "Image"; data: Uint8Array };
+    | { type: "Image"; data: string };
 
 export interface MessageBody {
     sender_id: UserId;
-    message: MessageContent;
+    content: MessageContent;
     timestamp: string;
 }
 

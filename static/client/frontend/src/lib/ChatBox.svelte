@@ -1,18 +1,21 @@
 <script lang="ts">
-    import {CircleUserRound, Send} from "lucide-svelte";
-    import {messages, serializeKey} from "../stores/store";
-    import {sendMessage} from "../utils/chat";
+    import { CircleUserRound, Paperclip, Send, X } from "lucide-svelte";
+    import { messages, serializeKey } from "../stores/store";
+    import { type Message as Msg } from "../types/message";
+    import { sendMessage } from "../utils/chat";
+    import { fileToBase64, isImageFile } from "../utils/file";
     import EmojiButton from "./EmojiButton.svelte";
     import Message from "./Message.svelte";
-    import {type Message as Msg} from "../types/message";
     import Toast from "./Toast.svelte";
+    import { clientUsers } from "../stores/users";
+    import type { User } from "../types/websocket";
 
     interface Props {
         clientId: number;
         destinationId: number;
     }
 
-    let {clientId, destinationId}: Props = $props();
+    let { clientId, destinationId }: Props = $props();
 
     let inputElement: HTMLInputElement | undefined = $state();
     let inputValue = $state("");
@@ -32,12 +35,42 @@
         $messages[serializeKey(clientId, destinationId)] || []
     );
 
-    // Auto-scroll to bottom when new messages arrive
+    // Get destination user's name
+    const user: User = $derived(
+        $clientUsers[clientId]?.users.find((u) => u.id === destinationId) ?? {
+            id: destinationId,
+            name: `Client ${destinationId}`,
+        }
+    );
+
+    // Scrolls to bottom without animation
     const scrollToBottom = () => {
         if (chatBox) {
             chatBox.scrollTop = chatBox.scrollHeight;
         }
     };
+
+    // Initial scroll and message observer
+    $effect.root(() => {
+        if (chatBox) {
+            // Immediate scroll on mount
+            scrollToBottom();
+        }
+    });
+
+    // Watch for new messages and scroll if needed
+    $effect(() => {
+        if (chatMessages && isAtBottom) {
+            scrollToBottom();
+        }
+    });
+
+    // Reset scroll position when changing chat
+    $effect(() => {
+        isAtBottom = true;
+        destinationId; // signal dependency
+        setTimeout(scrollToBottom, 0);
+    });
 
     // Check if user has scrolled away from bottom
     const checkScroll = () => {
@@ -49,22 +82,56 @@
             ) <= threshold;
     };
 
-    $effect(() => {
-        if ($messages[clientId] && chatBox && isAtBottom) {
-            scrollToBottom();
+    let imageData: string | null = $state(null);
+    let imagePreview: string | null = $state(null);
+    let fileInput: HTMLInputElement;
+
+    async function handleImageSelect(event: Event) {
+        const input = event.target as HTMLInputElement;
+        const file = input.files?.[0];
+
+        if (file && isImageFile(file)) {
+            imageData = await fileToBase64(file);
+            imagePreview = imageData;
         }
-    });
+        input.value = "";
+    }
+
+    async function handlePaste(event: ClipboardEvent) {
+        const items = event.clipboardData?.items;
+        if (!items) return;
+
+        for (const item of items) {
+            if (item.kind === "file") {
+                const file = item.getAsFile();
+                if (file && isImageFile(file)) {
+                    event.preventDefault();
+                    imageData = await fileToBase64(file);
+                    imagePreview = imageData;
+                    return;
+                }
+            }
+        }
+    }
 
     async function handleSend() {
-        if (!inputValue.trim()) {
-            return;
-        }
+        if (!imageData && !inputValue.trim()) return;
+
         try {
-            await sendMessage(clientId, destinationId, inputValue);
-            inputValue = "";
-            if (inputElement) {
-                inputElement.value = "";
+            if (imageData) {
+                await sendMessage(clientId, destinationId, imageData, "Image");
+                imageData = null;
+                imagePreview = null;
             }
+
+            if (inputValue.trim()) {
+                await sendMessage(clientId, destinationId, inputValue, "Text");
+                inputValue = "";
+                if (inputElement) {
+                    inputElement.value = "";
+                }
+            }
+
             isAtBottom = true;
         } catch (error) {
             console.error(error);
@@ -72,6 +139,11 @@
             toastId++;
             showToast = true;
         }
+    }
+
+    function cancelImage() {
+        imageData = null;
+        imagePreview = null;
     }
 
     function handleKeydown(event: KeyboardEvent) {
@@ -103,39 +175,84 @@
 <div class="w-full h-[450px] flex flex-col">
     <!-- Aggiungi intestazione -->
     <div class="p-4 border-b border-gray-100 dark:border-gray-700">
-        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-            <CircleUserRound class="size-5 text-gray-600 dark:text-gray-300"/>
-            Client {destinationId}
-        </h3>
+        <div class="flex items-center justify-between">
+            <h3
+                class="text-lg font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2"
+            >
+                <CircleUserRound
+                    class="size-5 text-gray-600 dark:text-gray-300"
+                />
+                {user.name}
+            </h3>
+            <span class="text-sm text-gray-500 dark:text-gray-400"
+                >ID: {user.id}</span
+            >
+        </div>
     </div>
 
     <div
-            bind:this={chatBox}
-            onscroll={checkScroll}
-            class="chat-box flex-1 overflow-y-auto space-y-4 p-4 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700"
+        bind:this={chatBox}
+        onscroll={checkScroll}
+        class="chat-box flex-1 overflow-y-auto space-y-4 p-4 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700"
     >
         {#each chatMessages as msg}
-            <Message message={msg} isReceived={msg.sender_id !== clientId}/>
+            <Message message={msg} isReceived={msg.sender_id !== clientId} />
         {/each}
     </div>
+
+    {#if imagePreview}
+        <div
+            class="p-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800"
+        >
+            <div class="relative inline-block">
+                <img
+                    src={imagePreview}
+                    alt="Preview"
+                    class="max-h-48 rounded-lg"
+                />
+                <button
+                    onclick={cancelImage}
+                    class="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                >
+                    <X class="size-4" />
+                </button>
+            </div>
+        </div>
+    {/if}
+
     <div class="p-4 border-t border-gray-100 dark:border-gray-700">
         <div class="flex gap-2">
+            <input
+                type="file"
+                accept="image/*"
+                class="hidden"
+                bind:this={fileInput}
+                onchange={handleImageSelect}
+            />
+            <button
+                onclick={() => fileInput.click()}
+                class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                title="Attach image"
+            >
+                <Paperclip class="size-5" />
+            </button>
             <div class="relative flex-1">
                 <input
-                        type="text"
-                        class="message-input w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
-                        placeholder="Write a message..."
-                        bind:value={inputValue}
-                        bind:this={inputElement}
-                        onkeydown={handleKeydown}
+                    type="text"
+                    class="message-input w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
+                    placeholder="Write a message..."
+                    bind:value={inputValue}
+                    bind:this={inputElement}
+                    onkeydown={handleKeydown}
+                    onpaste={handlePaste}
                 />
-                <EmojiButton {inputElement} onEmojiSelect={handleEmoji}/>
+                <EmojiButton {inputElement} onEmojiSelect={handleEmoji} />
             </div>
             <button
-                    class="send-button p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-200 flex items-center justify-center"
-                    onclick={handleSend}
+                class="send-button p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-200 flex items-center justify-center"
+                onclick={handleSend}
             >
-                <Send class="size-5"/>
+                <Send class="size-5" />
             </button>
         </div>
     </div>
@@ -143,9 +260,9 @@
 
 {#if showToast}
     <Toast
-            message={toastMessage}
-            type="error"
-            onClose={() => (showToast = false)}
-            key={toastId}
+        message={toastMessage}
+        type="error"
+        onClose={() => (showToast = false)}
+        key={toastId}
     />
 {/if}

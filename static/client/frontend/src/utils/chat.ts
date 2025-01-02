@@ -5,16 +5,18 @@ import type { Message } from "../types/message";
 export async function sendMessage(
     senderId: number,
     receiverId: number,
-    content: string | Uint8Array
+    content: string,
+    messageType: 'Text' | 'Image'
 ) {
     if (!content) return;
 
     const serverId = get(registrationStatus)[senderId];
     const timestamp = new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
     
-    const messageContent = content instanceof Uint8Array
-        ? { type: 'Image' as const, data: content }
-        : { type: 'Text' as const, data: content };
+    const messageContent = {
+        type: messageType,
+        data: content
+    };
 
     const message: Message = {
         content: messageContent,

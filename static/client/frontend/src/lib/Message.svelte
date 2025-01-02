@@ -9,36 +9,40 @@
     let { message, isReceived }: Props = $props();
 </script>
 
-<div
-    class="flex {isReceived
-        ? 'justify-start'
-        : 'justify-end'} items-end gap-2 animate-fadeIn"
->
-    <div class="max-w-[80%] group">
-        <div
-            class="rounded-2xl px-4 py-2 {isReceived
-                ? 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-bl-none'
-                : 'bg-blue-500 text-white rounded-br-none'} shadow-sm break-words whitespace-pre-wrap overflow-hidden"
-        >
-            {#if message.content.type === "Text"}
+<div class="flex {isReceived ? 'justify-start' : 'justify-end'} animate-fadeIn">
+    <div class="flex flex-col {message.content.type === 'Text' ? 'max-w-[70%]' : 'w-[60%]'} gap-0.5">
+        {#if message.content.type === "Text"}
+            <div 
+                class="inline-block rounded-2xl px-4 py-2 {isReceived
+                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-bl-none'
+                    : 'bg-blue-500 text-white rounded-br-none'} shadow-sm break-words whitespace-pre-wrap overflow-hidden"
+            >
                 {message.content.data}
-            {:else}
-                TODO: IMAGES
-            {/if}
-        </div>
-        <div
-            class="flex items-center {isReceived
-                ? 'justify-start'
-                : 'justify-end'} gap-2 mt-1"
-        >
-            <span class="text-xs text-gray-500 dark:text-gray-400">
-                {message.timestamp}
-            </span>
-            {#if isReceived}
-                <span class="text-xs text-gray-400"
-                    >ID: {message.sender_id}</span
-                >
-            {/if}
-        </div>
+            </div>
+        {:else if message.content.type === "Image"}
+            <div 
+                class="p-1 rounded-xl {isReceived
+                    ? 'bg-gray-100 dark:bg-gray-700 rounded-bl-none'
+                    : 'bg-blue-500 rounded-br-none'} shadow-sm"
+            >
+                <img 
+                    src={message.content.data}
+                    alt="Sent img"
+                    class="w-full h-auto rounded-xl object-cover"
+                    loading="lazy"
+                />
+            </div>
+        {/if}
+        <span class="text-xs text-gray-500 dark:text-gray-400 px-1 {isReceived ? 'text-left' : 'text-right'}">
+            {message.timestamp}
+        </span>
     </div>
 </div>
+
+<style>
+/* Evita taglio di parole brevi e garantisci spezzatura del testo */
+.inline-block {
+    word-wrap: break-word;
+    word-break: break-word;
+}
+</style>
