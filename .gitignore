@@ -1,4 +1,6 @@
 /target
 .idea
 .env
+/static
+.vscode
 Cargo.lock
