@@ -17,9 +17,6 @@ export function deserializeKey(key: string) {
 // Variable to store all the clients that are active
 export const displayedChats = writable<Set<number>>(new Set());
 
-// Variable to store the available users, registered to the same server
-export const reachableUsers = writable<number[]>([1, 2, 3, 4, 5]);
-
 // Variable to store the registration status of the user
 // key: user_id, value: server_id (-1 if not registered)
 export const registrationStatus = writable<Record<number, number>>({});
@@ -35,3 +32,37 @@ export const pendingUnregistrations = writable<Set<number>>(new Set());
 
 // Variable to store client usernames
 export const clientUsernames = writable<Record<number, string>>({});
+
+// Variable to store unread messages count per chat
+// First key: viewer_id, Second key: sender_id, Value: count
+export const unreadMessages = writable<Record<number, Record<number, number>>>({});
+
+// Variable to store which chat each client is currently viewing
+// key: viewer_id, value: destination_id
+export const currentChats = writable<Record<number, number>>({});
+
+// Function to increment unread messages
+export function incrementUnread(viewerId: number, senderId: number) {
+    unreadMessages.update(state => {
+        const userUnread = state[viewerId] || {};
+        return {
+            ...state,
+            [viewerId]: {
+                ...userUnread,
+                [senderId]: (userUnread[senderId] || 0) + 1
+            }
+        };
+    });
+}
+
+// Function to clear unread messages
+export function clearUnread(viewerId: number, senderId: number) {
+    unreadMessages.update(state => {
+        const userUnread = state[viewerId] || {};
+        const { [senderId]: _, ...rest } = userUnread;
+        return {
+            ...state,
+            [viewerId]: rest
+        };
+    });
+}

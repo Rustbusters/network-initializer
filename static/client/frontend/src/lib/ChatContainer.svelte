@@ -5,6 +5,7 @@
     import { onMount } from "svelte";
     import { requestRegisteredUsers } from "../utils/users";
     import ImageViewer from "./ImageViewer.svelte";
+    import { unreadMessages, clearUnread, currentChats } from "../stores/store";
 
     interface Props {
         clientId: number;
@@ -26,6 +27,19 @@
     }
 
     let activeImage = $state<string | null>(null);
+
+    $effect(() => {
+        // Update current chat when destination changes
+        currentChats.update(chats => ({
+            ...chats,
+            [clientId]: destinationId
+        }));
+
+        // Clear unread messages when switching to a chat
+        if (destinationId !== -1) {
+            clearUnread(clientId, destinationId);
+        }
+    });
 </script>
 
 <div class="flex w-full">
@@ -52,7 +66,7 @@
                 <div class="space-y-2">
                     {#each $clientUsers[clientId]?.users || [] as user}
                         <button
-                            class="w-full p-2 rounded cursor-pointer transition-colors flex items-center gap-2
+                            class="w-full p-2 rounded cursor-pointer transition-colors flex items-center gap-2 relative
                                    {destinationId === user.id 
                                        ? 'bg-blue-100 dark:bg-blue-900' 
                                        : 'hover:bg-gray-100 dark:hover:bg-gray-700'}"
@@ -66,6 +80,12 @@
                                 : 'text-gray-800 dark:text-gray-100'}">
                                 {user.name}
                             </span>
+                            
+                            {#if ($unreadMessages[clientId]?.[user.id] ?? 0) > 0}
+                                <span class="absolute right-2 top-1/2 -translate-y-1/2 min-w-[20px] h-5 flex items-center justify-center bg-blue-500 text-white text-xs rounded-full px-1.5">
+                                    {$unreadMessages[clientId][user.id]}
+                                </span>
+                            {/if}
                         </button>
                     {/each}
                 </div>
