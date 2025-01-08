@@ -9,8 +9,8 @@ simulation-controller = { git = "https://github.com/Rustbusters/simulation-contr
 #simulation-controller = { path = "../simulation-controller" }
 node = { git = "https://github.com/Rustbusters/node.git", branch = "dev/common" }
 #node = { path = "../node" }
-client = { git = "https://github.com/Rustbusters/client.git" }
-#client = { path = "../client" }
+#client = { git = "https://github.com/Rustbusters/client.git" }
+client = { path = "../client" }
 rustbusters-drone = { git = "https://github.com/Rustbusters/drone.git" }
 #rustbusters-drone = { path = "../rustbusters-drone" }
 common-utils = { git = "https://github.com/Rustbusters/common-utils.git" }

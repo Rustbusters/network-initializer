@@ -23,6 +23,7 @@
 
     // svelte-ignore non_reactive_update
     let chatBox: HTMLDivElement;
+    let chatBoxWrapper: HTMLDivElement;
 
     // Track if chat is scrolled to bottom
     let isAtBottom = true;
@@ -175,6 +176,36 @@
             }
         }, 0);
     }
+
+    let isDragging = $state(false);
+
+    function handleDragOver(event: DragEvent) {
+        event.preventDefault();
+        event.stopPropagation();
+        isDragging = true;
+    }
+
+    function handleDragLeave(event: DragEvent) {
+        // Previeni che il leave si attivi quando si entra in elementi figli
+        const rect = chatBox.getBoundingClientRect();
+        const x = event.clientX;
+        const y = event.clientY;
+        
+        if (x <= rect.left || x >= rect.right || y <= rect.top || y >= rect.bottom) {
+            isDragging = false;
+        }
+    }
+
+    async function handleDrop(event: DragEvent) {
+        event.preventDefault();
+        isDragging = false;
+
+        const file = event.dataTransfer?.files[0];
+        if (file && isImageFile(file)) {
+            imageData = await fileToBase64(file);
+            imagePreview = imageData;
+        }
+    }
 </script>
 
 <div class="w-full h-[450px] flex flex-col">
@@ -195,18 +226,37 @@
         </div>
     </div>
 
-    <div
-        bind:this={chatBox}
-        onscroll={checkScroll}
-        class="chat-box flex-1 overflow-y-auto space-y-4 p-4 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700"
+    <div 
+        bind:this={chatBoxWrapper} 
+        class="relative flex-1 overflow-hidden"
     >
-        {#each chatMessages as msg}
-            <Message 
-                message={msg} 
-                isReceived={msg.sender_id !== clientId}
-                onImageClick={onImageClick}
-            />
-        {/each}
+        {#if isDragging}
+            <div 
+                class="absolute inset-5 bg-blue-100/50 dark:bg-blue-900/50 border-2 border-dashed border-blue-500 rounded-lg flex items-center justify-center z-10 pointer-events-none"
+            >
+                <p class="text-blue-600 dark:text-blue-400 font-medium">
+                    Release here to attach image
+                </p>
+            </div>
+        {/if}
+        
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
+        <div
+            bind:this={chatBox}
+            onscroll={checkScroll}
+            ondragover={handleDragOver}
+            ondragleave={handleDragLeave}
+            ondrop={handleDrop}
+            class="chat-box absolute inset-0 overflow-y-auto space-y-4 p-4 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700"
+        >
+            {#each chatMessages as msg}
+                <Message 
+                    message={msg} 
+                    isReceived={msg.sender_id !== clientId}
+                    onImageClick={onImageClick}
+                />
+            {/each}
+        </div>
     </div>
 
     {#if imagePreview}
