@@ -2,7 +2,7 @@ import { writable } from 'svelte/store';
 import type { Message } from '../types/message';
 
 // Variable to store the pair (user that is displaying the chat, the user that is being displayed)
-// key: displayer|other
+// key: viewer_id|other_client_id (other_client_id is the user that the current client is chatting with)
 export const messages = writable<Record<string, Message[]>>({});
 
 export function serializeKey(displayer: number, other: number) {
@@ -14,7 +14,7 @@ export function deserializeKey(key: string) {
 	return { displayer, other };
 }
 
-// Variable to store all the clients that are active
+// Variable to store all the client nodes that are active (active intended as running in the simulation)
 export const displayedChats = writable<Set<number>>(new Set());
 
 // Variable to store the registration status of the user
@@ -30,14 +30,14 @@ export const isDisconnecting = writable<Record<number, boolean>>({});
 // Variable to store pending unregistrations
 export const pendingUnregistrations = writable<Set<number>>(new Set());
 
-// Variable to store client usernames
+// Variable to store client usernames (each client when registering will send a username)
 export const clientUsernames = writable<Record<number, string>>({});
 
 // Variable to store unread messages count per chat
 // First key: viewer_id, Second key: sender_id, Value: count
 export const unreadMessages = writable<Record<number, Record<number, number>>>({});
 
-// Variable to store which chat each client is currently viewing
+// Variable to store which chat each client is currently viewing in his window
 // key: viewer_id, value: destination_id
 export const currentChats = writable<Record<number, number>>({});
 

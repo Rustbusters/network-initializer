@@ -1,21 +1,23 @@
-import {get} from "svelte/store";
-import {setUsers} from "../../stores/users";
+import { get } from "svelte/store";
 import {
-    displayedChats as activeUsers,
     clientUsernames,
+    currentChats,
+    deserializeKey,
+    incrementUnread,
     isDisconnecting,
     messages,
     pendingRegistrations,
     pendingUnregistrations,
     registrationStatus,
     serializeKey,
-    incrementUnread,
-    currentChats,
-    deserializeKey,
-    unreadMessages
+    unreadMessages,
 } from "../../stores/store";
-import type {ServerToClientMessage, WebSocketMessage,} from "../../types/websocket";
+import { clientUsers, isUserPresent, setUsers } from "../../stores/users";
 import type { Message } from "../../types/message";
+import type {
+    ServerToClientMessage,
+    WebSocketMessage,
+} from "../../types/websocket";
 
 export function handleMessage(wsMessage: WebSocketMessage) {
     const message = wsMessage.message as ServerToClientMessage;
@@ -40,7 +42,7 @@ export function handleMessage(wsMessage: WebSocketMessage) {
                 return set;
             });
             clientUsernames.update((usernames) => {
-                const {[wsMessage.client_id]: _, ...rest} = usernames;
+                const { [wsMessage.client_id]: _, ...rest } = usernames;
                 return rest;
             });
             break;
@@ -48,32 +50,32 @@ export function handleMessage(wsMessage: WebSocketMessage) {
         case "UnregisterSuccess":
             if (get(pendingUnregistrations).has(wsMessage.client_id)) {
                 // Clear disconnection status
-                isDisconnecting.update(state => ({
+                isDisconnecting.update((state) => ({
                     ...state,
-                    [wsMessage.client_id]: false
+                    [wsMessage.client_id]: false,
                 }));
 
                 // Clear all data related to this client
                 registrationStatus.update((status) => {
-                    const {[wsMessage.client_id]: _, ...rest} = status;
+                    const { [wsMessage.client_id]: _, ...rest } = status;
                     return rest;
                 });
 
-                pendingUnregistrations.update(set => {
+                pendingUnregistrations.update((set) => {
                     set.delete(wsMessage.client_id);
                     return set;
                 });
 
                 clientUsernames.update((usernames) => {
-                    const {[wsMessage.client_id]: _, ...rest} = usernames;
+                    const { [wsMessage.client_id]: _, ...rest } = usernames;
                     return rest;
                 });
 
                 // Clear messages
-                messages.update(messages => {
+                messages.update((messages) => {
                     const newMessages: Record<string, Message[]> = {};
                     for (const key in messages) {
-                        const {displayer} = deserializeKey(key);
+                        const { displayer } = deserializeKey(key);
                         if (displayer !== wsMessage.client_id) {
                             newMessages[key] = messages[key];
                         }
@@ -82,14 +84,14 @@ export function handleMessage(wsMessage: WebSocketMessage) {
                 });
 
                 // Clear unread messages
-                unreadMessages.update(state => {
-                    const {[wsMessage.client_id]: _, ...rest} = state;
+                unreadMessages.update((state) => {
+                    const { [wsMessage.client_id]: _, ...rest } = state;
                     return rest;
                 });
 
                 // Clear current chat
-                currentChats.update(state => {
-                    const {[wsMessage.client_id]: _, ...rest} = state;
+                currentChats.update((state) => {
+                    const { [wsMessage.client_id]: _, ...rest } = state;
                     return rest;
                 });
             }
@@ -98,12 +100,14 @@ export function handleMessage(wsMessage: WebSocketMessage) {
         case "UnregisterFailure":
             // Processiamo il fallimento solo se c'è una disconnessione pendente
             if (get(pendingUnregistrations).has(wsMessage.client_id)) {
-                console.warn(`Failed to unregister client ${wsMessage.client_id}`);
-                isDisconnecting.update(state => ({
+                console.warn(
+                    `Failed to unregister client ${wsMessage.client_id}`
+                );
+                isDisconnecting.update((state) => ({
                     ...state,
-                    [wsMessage.client_id]: false
+                    [wsMessage.client_id]: false,
                 }));
-                pendingUnregistrations.update(set => {
+                pendingUnregistrations.update((set) => {
                     set.delete(wsMessage.client_id);
                     return set;
                 });
@@ -111,14 +115,21 @@ export function handleMessage(wsMessage: WebSocketMessage) {
             break;
 
         case "ActiveUsersList":
-            setUsers(wsMessage.client_id, message.users);
+            console.log("ActiveUsersList", message.users);
+
+            // remove myself from the list of active users
+            let users = message.users.filter(
+                (user) => user.id !== wsMessage.client_id
+            );
+
+            // Update the list of active users
+            setUsers(wsMessage.client_id, users);
             break;
 
         case "PrivateMessage":
             // Only process messages if the sender is in active users
             // Add message to the conversation history using a serialized key
-            // TODO: Controllare bene questo controllo. Con il test_ws non funziona Bob con id 14
-            if (get(activeUsers).has(message.sender_id)) {
+            if (isUserPresent(wsMessage.client_id, message.sender_id)) {
                 const key = serializeKey(
                     wsMessage.client_id,
                     message.sender_id

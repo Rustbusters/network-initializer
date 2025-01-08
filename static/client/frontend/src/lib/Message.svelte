@@ -27,6 +27,8 @@
                     ? 'bg-gray-100 dark:bg-gray-700 rounded-bl-none'
                     : 'bg-blue-500 rounded-br-none'} shadow-sm"
             >
+                <!-- svelte-ignore a11y_click_events_have_key_events -->
+                <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
                 <img 
                     src={message.content.data}
                     alt="Sent img"
