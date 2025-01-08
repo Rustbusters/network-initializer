@@ -63,7 +63,8 @@
     // Watch for new messages and scroll if needed
     $effect(() => {
         if (chatMessages && isAtBottom) {
-            scrollToBottom();
+            // Aggiungiamo un delay leggermente più lungo per assicurarci che il DOM sia aggiornato
+            setTimeout(scrollToBottom, 60);
         }
     });
 
@@ -137,7 +138,14 @@
                 }
             }
 
+            // Forziamo isAtBottom a true e chiamiamo scrollToBottom con un delay
             isAtBottom = true;
+            // Aumentiamo il delay per assicurarci che il messaggio sia stato renderizzato
+            setTimeout(() => {
+                scrollToBottom();
+                // Doppio check per assicurarci che lo scroll sia avvenuto
+                setTimeout(scrollToBottom, 50);
+            }, 60);
         } catch (error) {
             isSendingImage = false;
             console.error(error);
@@ -232,7 +240,7 @@
     >
         {#if isDragging}
             <div 
-                class="absolute inset-5 bg-blue-100/50 dark:bg-blue-900/50 border-2 border-dashed border-blue-500 rounded-lg flex items-center justify-center z-10 pointer-events-none"
+                class="absolute inset-5 backdrop-blur-sm bg-blue-100/70 dark:bg-blue-900/70 border-2 border-dashed border-blue-500 rounded-lg flex items-center justify-center z-10 pointer-events-none"
             >
                 <p class="text-blue-600 dark:text-blue-400 font-medium">
                     Release here to attach image
