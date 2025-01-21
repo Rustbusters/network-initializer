@@ -10,6 +10,8 @@
     import { connectionStatus } from "../utils/websocket/main";
     import ChatContainer from "./ChatContainer.svelte";
     import ServerSelector from "./ServerSelector.svelte";
+    import Toast from "./Toast.svelte";
+    import { userEvents } from "../stores/events";
 
     interface Props {
         clientId: number;
@@ -18,6 +20,28 @@
     let { clientId }: Props = $props();
 
     let destinationId = $derived($currentChats[clientId] ?? -1);
+    let toastData = $state<{ message: string; type: 'error' | 'success'; key: number } | null>(null);
+
+    // Subscribe to user events
+    $effect(() => {
+        const event = $userEvents[clientId];
+        if (event) {
+            toastData = {
+                message: event.message,
+                type: event.type,
+                key: Date.now()
+            };
+        }
+    });
+
+    // Function to show toast from child components
+    function showToast(message: string, type: 'error' | 'success') {
+        toastData = {
+            message,
+            type,
+            key: Date.now()
+        };
+    }
 
     async function handleUnregister() {
         if ($isDisconnecting[clientId]) return;
@@ -114,6 +138,15 @@
     {#if $registrationStatus[clientId]}
         <ChatContainer {clientId} {destinationId} />
     {:else}
-        <ServerSelector {clientId} />
+        <ServerSelector {clientId} {showToast} />
+    {/if}
+
+    {#if toastData}
+        <Toast
+            message={toastData.message}
+            type={toastData.type}
+            onClose={() => toastData = null}
+            key={toastData.key}
+        />
     {/if}
 </div>

@@ -2,20 +2,18 @@
     import { LoaderCircle } from "lucide-svelte";
     import { onMount } from "svelte";
     import { pendingRegistrations, clientUsernames } from "../stores/store";
-    import Toast from "./Toast.svelte";
 
     interface Props {
         clientId: number;
+        showToast: (message: string, type: 'error' | 'success') => void;
     }
-    let { clientId }: Props = $props();
+    
+    let { clientId, showToast }: Props = $props();
 
     let availableServers: number[] = $state([]);
     let showModal = $state(false);
     let selectedServer = $state(-1);
     let username = $state("");
-    let showToast = $state(false);
-    let toastMessage = $state("");
-    let toastId = $state(0);
     let isRefreshing = $state(false);
 
     // svelte-ignore non_reactive_update
@@ -76,15 +74,11 @@
                     return set;
                 });
             } else {
-                toastMessage = `Registration failed for Server ${selectedServer}. Please try again.`;
-                toastId++;
-                showToast = true;
+                showToast(`Registration failed for Server ${selectedServer}. Please try again.`, 'error');
             }
         } catch (error) {
             console.error(error);
-            toastMessage = `Registration failed for Server ${selectedServer}. Please try again.`;
-            toastId++;
-            showToast = true;
+            showToast(`Registration failed for Server ${selectedServer}. Please try again.`, 'error');
         }
     }
 
@@ -238,12 +232,3 @@
         {/if}
     {/if}
 </div>
-
-{#if showToast}
-    <Toast
-        message={toastMessage}
-        type="error"
-        onClose={() => (showToast = false)}
-        key={toastId}
-    />
-{/if}

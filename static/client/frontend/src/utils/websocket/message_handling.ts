@@ -13,6 +13,7 @@ import {
     unreadMessages,
 } from "../../stores/store";
 import { clientUsers, isUserPresent, setUsers } from "../../stores/users";
+import { userEvents } from "../../stores/events";
 import type { Message } from "../../types/message";
 import type {
     ServerToClientMessage,
@@ -45,6 +46,15 @@ export function handleMessage(wsMessage: WebSocketMessage) {
                 const { [wsMessage.client_id]: _, ...rest } = usernames;
                 return rest;
             });
+            
+            // Add toast trigger for registration failure
+            userEvents.update(events => ({
+                ...events,
+                [wsMessage.client_id]: {
+                    message: `Failed to register to server. Please try again.`,
+                    type: 'error'
+                }
+            }));
             break;
 
         case "UnregisterSuccess":
@@ -138,14 +148,36 @@ export function handleMessage(wsMessage: WebSocketMessage) {
                     },
                 };
             });
+
+            // Emit user joined event
+            userEvents.update(events => ({
+                ...events,
+                [wsMessage.client_id]: {
+                    message: `${message.user.name} joined the server`,
+                    type: 'success'
+                }
+            }));
             break;
             
         case "UserUnregistered":
             // Update the list of active users
             clientUsers.update((users) => {
+                const unregisteringUser = users[wsMessage.client_id].users.find(u => u.id === message.id);
                 const newUsers = users[wsMessage.client_id].users.filter(
                     (user) => user.id !== message.id
                 );
+
+                // Emit user left event if we found the user
+                if (unregisteringUser) {
+                    userEvents.update(events => ({
+                        ...events,
+                        [wsMessage.client_id]: {
+                            message: `${unregisteringUser.name} left the server`,
+                            type: 'error'
+                        }
+                    }));
+                }
+
                 return {
                     ...users,
                     [wsMessage.client_id]: {
