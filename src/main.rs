@@ -1,6 +1,8 @@
+mod utils;
+
 use crossbeam_channel::{unbounded, Receiver, Sender};
 use drone::RustBustersDrone;
-use log::info;
+use log::{error, info};
 use node::commands::{HostCommand, HostEvent};
 use node::SimpleHost;
 use simulation_controller::RustBustersSimulationController;
@@ -26,6 +28,11 @@ fn main() {
     let config: Config = toml::from_str(&config_data).expect("Unable to parse TOML");
 
     // TODO: Check if input is well parsed
+    if let Err(error_message) = utils::input_validator::validate_config(&config) {
+        error!("{}", error_message);
+        println!("ERROR: {}", error_message);
+        return ();
+    }
 
     // Initialize crossbeam channels for internal communication
     let mut intra_node_channels: HashMap<NodeId, (Sender<Packet>, Receiver<Packet>)> =
@@ -97,6 +104,7 @@ fn main() {
                 packet_send,
                 drone.pdr,
             );
+            drone.enable_sound();
             drone.run();
         });
 
@@ -193,14 +201,14 @@ fn main() {
     let sim_controller = RustBustersSimulationController::new(params);
 
     // CLI option
-    let mut cli = simulation_controller::SimulationControllerCLI::new(sim_controller);
-    cli.run();
+    // let mut cli = simulation_controller::SimulationControllerCLI::new(sim_controller);
+    // cli.run();
 
     // GUI Option
-    // match simulation_controller::run(sim_controller){
-    //     Ok(_) => (),
-    //     Err(error) => panic!("Unable to run simulation: {}", error),
-    // }
+    match simulation_controller::run(sim_controller){
+        Ok(_) => (),
+        Err(error) => panic!("Unable to run simulation: {}", error),
+    }
 
     // Wait for all the childs to terminate before terminating the whole program
     // info!("Waiting the end of execution of the nodes");

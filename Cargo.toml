@@ -5,8 +5,8 @@ edition = "2021"
 
 [dependencies]
 wg_2024 = { git = "https://github.com/WGL-2024/WGL_repo_2024.git", features = ["serialize"] }
-simulation-controller = { git = "https://github.com/Rustbusters/simulation-controller.git" }
-#simulation-controller = { path = "../simulation-controller" }
+#simulation-controller = { git = "https://github.com/Rustbusters/simulation-controller.git" }
+simulation-controller = { path = "../simulation-controller" }
 node = { git = "https://github.com/Rustbusters/node.git" }
 #node = { path = "../node" }
 drone = { git = "https://github.com/Rustbusters/drone.git" }
