@@ -39,7 +39,14 @@
         if (destinationId !== -1) {
             clearUnread(clientId, destinationId);
         }
+
+        // Reset active image when changing chat
+        activeImage = null;
     });
+
+    function handleUserSelect(userId: number) {
+        destinationId = userId;
+    }
 </script>
 
 <div class="flex w-full">
@@ -70,7 +77,7 @@
                                    {destinationId === user.id 
                                        ? 'bg-blue-100 dark:bg-blue-900' 
                                        : 'hover:bg-gray-100 dark:hover:bg-gray-700'}"
-                            onclick={() => destinationId = user.id}
+                            onclick={() => handleUserSelect(user.id)}
                         >
                             <CircleUserRound class="size-5 {destinationId === user.id 
                                 ? 'text-blue-600 dark:text-blue-400' 

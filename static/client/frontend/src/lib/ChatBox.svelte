@@ -52,6 +52,11 @@
         }
     };
 
+    // Handle image load event
+    function handleImageLoad() {
+        setTimeout(scrollToBottom, 60);
+    }
+
     // Initial scroll and message observer
     $effect.root(() => {
         if (chatBox) {
@@ -262,6 +267,7 @@
                     message={msg} 
                     isReceived={msg.sender_id !== clientId}
                     onImageClick={onImageClick}
+                    onImageLoad={handleImageLoad}
                 />
             {/each}
         </div>
