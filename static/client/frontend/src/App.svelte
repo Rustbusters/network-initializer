@@ -1,8 +1,8 @@
 <script lang="ts">
     import { LoaderCircle, MessageSquare, Moon, Sun } from "lucide-svelte";
-    import { onMount } from "svelte";
+    import { onDestroy, onMount } from "svelte";
     import Chat from "./lib/Chat.svelte";
-    import { displayedChats } from "./stores/store";
+    import { displayedChats, registrationStatus } from "./stores/store";
     import { initialize } from "./utils/init";
     import { attemptReconnect, connectionStatus } from "./utils/websocket/main";
 
@@ -13,7 +13,39 @@
         setTimeout(() => {
             loading = false;
         }, 800);
+
+        // Add event listener for page unload
+        window.addEventListener("beforeunload", handleUnload);
     });
+
+    onDestroy(() => {
+        // Remove event listener for page unload
+        window.removeEventListener("beforeunload", handleUnload);
+
+        // Unregister clients on component destroy
+        unregisterClients();
+    });
+
+    function handleUnload(event: Event) {
+        unregisterClients();
+    }
+
+    function unregisterClients() {
+        console.error("Unregistering clients...");
+        $displayedChats.forEach((clientId) => {
+            fetch("/api/unregister", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    client_id: clientId,
+                    server_id: $registrationStatus[clientId],
+                }),
+            });
+        });
+        console.warn("Clients unregistered.");
+    }
 </script>
 
 <div class="container mx-auto p-4 lg:p-6">
@@ -114,9 +146,7 @@
             class="text-center flex flex-col gap-4 items-center justify-center"
         >
             <LoaderCircle class="w-16 h-16 text-blue-500 animate-spin mb-4" />
-            <p class="text-gray-600 dark:text-gray-300">
-                Loading chats...
-            </p>
+            <p class="text-gray-600 dark:text-gray-300">Loading chats...</p>
         </div>
     </div>
 {/if}

@@ -126,6 +126,45 @@ export function handleMessage(wsMessage: WebSocketMessage) {
             setUsers(wsMessage.client_id, users);
             break;
 
+        case "NewUserRegistered":
+            // Update the list of active users
+            clientUsers.update((users) => {
+                const newUsers = users[wsMessage.client_id].users;
+                return {
+                    ...users,
+                    [wsMessage.client_id]: {
+                        ...users[wsMessage.client_id],
+                        users: [...newUsers, message.user],
+                    },
+                };
+            });
+            break;
+            
+        case "UserUnregistered":
+            // Update the list of active users
+            clientUsers.update((users) => {
+                const newUsers = users[wsMessage.client_id].users.filter(
+                    (user) => user.id !== message.id
+                );
+                return {
+                    ...users,
+                    [wsMessage.client_id]: {
+                        ...users[wsMessage.client_id],
+                        users: newUsers,
+                    },
+                };
+            });
+
+            // Clear current chat if the unregistered user is the current chat
+            currentChats.update((state) => {
+                if (state[wsMessage.client_id] === message.id) {
+                    const { [wsMessage.client_id]: _, ...rest } = state;
+                    return rest;
+                }
+                return state;
+            });
+            break;
+
         case "PrivateMessage":
             // Only process messages if the sender is in active users
             // Add message to the conversation history using a serialized key

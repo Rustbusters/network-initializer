@@ -2,6 +2,7 @@
     import { LoaderCircle } from "lucide-svelte";
     import {
         clientUsernames,
+        currentChats,
         isDisconnecting,
         pendingUnregistrations,
         registrationStatus,
@@ -16,7 +17,7 @@
 
     let { clientId }: Props = $props();
 
-    let destinationId = $state(-1);
+    let destinationId = $derived($currentChats[clientId] ?? -1);
 
     async function handleUnregister() {
         if ($isDisconnecting[clientId]) return;
@@ -111,7 +112,7 @@
         </div>
     </div>
     {#if $registrationStatus[clientId]}
-        <ChatContainer {clientId} bind:destinationId />
+        <ChatContainer {clientId} {destinationId} />
     {:else}
         <ServerSelector {clientId} />
     {/if}

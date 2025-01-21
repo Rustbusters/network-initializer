@@ -21,6 +21,8 @@ export type ServerToClientMessage =
     | { response: "UnregisterSuccess" }
     | { response: "UnregisterFailure" }
     | { response: "ActiveUsersList"; users: User[] }
+    | { response: "NewUserRegistered"; user: User }
+    | { response: "UserUnregistered"; id: UserId }
     | { response: "PrivateMessage"; sender_id: UserId; message: MessageBody; }
     | { response: "UserNotFound"; user_id: UserId };
 
