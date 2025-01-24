@@ -32,11 +32,6 @@
     let toastMessage = $state("");
     let toastId = $state(0);
 
-    // Derived messages for current chat
-    let chatMessages: Msg[] = $derived(
-        $messages[serializeKey(clientId, destinationId)] || []
-    );
-
     // Get destination user's name
     const user: User = $derived(
         $clientUsers[clientId]?.users.find((u) => u.id === destinationId) ?? {
@@ -67,7 +62,7 @@
 
     // Watch for new messages and scroll if needed
     $effect(() => {
-        if (chatMessages && isAtBottom) {
+        if ($messages[serializeKey(clientId, destinationId)] && isAtBottom) {
             // Aggiungiamo un delay leggermente più lungo per assicurarci che il DOM sia aggiornato
             setTimeout(scrollToBottom, 60);
         }
@@ -262,7 +257,7 @@
             ondrop={handleDrop}
             class="chat-box absolute inset-0 overflow-y-auto space-y-4 p-4 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700"
         >
-            {#each chatMessages as msg}
+            {#each ($messages[serializeKey(clientId, destinationId)] || []) as msg}
                 <Message 
                     message={msg} 
                     isReceived={msg.sender_id !== clientId}
