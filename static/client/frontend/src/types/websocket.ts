@@ -24,7 +24,8 @@ export type ServerToClientMessage =
     | { response: "NewUserRegistered"; user: User }
     | { response: "UserUnregistered"; id: UserId }
     | { response: "PrivateMessage"; sender_id: UserId; message: MessageBody; }
-    | { response: "UserNotFound"; user_id: UserId };
+    | { response: "UserNotFound"; user_id: UserId }
+    | { response: "SendingError"; error: string; message: any };
 
 export interface WebSocketMessage {
     client_id: number;

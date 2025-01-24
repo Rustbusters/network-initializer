@@ -16,6 +16,7 @@ import { clientUsers, isUserPresent, setUsers } from "../../stores/users";
 import { userEvents } from "../../stores/events";
 import type { Message } from "../../types/message";
 import type {
+    MessageBody,
     ServerToClientMessage,
     WebSocketMessage,
 } from "../../types/websocket";
@@ -46,14 +47,14 @@ export function handleMessage(wsMessage: WebSocketMessage) {
                 const { [wsMessage.client_id]: _, ...rest } = usernames;
                 return rest;
             });
-            
+
             // Add toast trigger for registration failure
-            userEvents.update(events => ({
+            userEvents.update((events) => ({
                 ...events,
                 [wsMessage.client_id]: {
                     message: `Failed to register to server. Please try again.`,
-                    type: 'error'
-                }
+                    type: "error",
+                },
             }));
             break;
 
@@ -150,31 +151,33 @@ export function handleMessage(wsMessage: WebSocketMessage) {
             });
 
             // Emit user joined event
-            userEvents.update(events => ({
+            userEvents.update((events) => ({
                 ...events,
                 [wsMessage.client_id]: {
                     message: `${message.user.name} joined the server`,
-                    type: 'success'
-                }
+                    type: "success",
+                },
             }));
             break;
-            
+
         case "UserUnregistered":
             // Update the list of active users
             clientUsers.update((users) => {
-                const unregisteringUser = users[wsMessage.client_id].users.find(u => u.id === message.id);
+                const unregisteringUser = users[wsMessage.client_id].users.find(
+                    (u) => u.id === message.id
+                );
                 const newUsers = users[wsMessage.client_id].users.filter(
                     (user) => user.id !== message.id
                 );
 
                 // Emit user left event if we found the user
                 if (unregisteringUser) {
-                    userEvents.update(events => ({
+                    userEvents.update((events) => ({
                         ...events,
                         [wsMessage.client_id]: {
                             message: `${unregisteringUser.name} left the server`,
-                            type: 'error'
-                        }
+                            type: "error",
+                        },
                     }));
                 }
 
@@ -232,6 +235,56 @@ export function handleMessage(wsMessage: WebSocketMessage) {
 
         case "UserNotFound":
             console.warn(`User ${message.user_id} not found`);
+            break;
+
+        case "SendingError":
+            if (message.message.request === "SendPrivateMessage") {
+                const sendingError = message.message as {
+                    request: "SendPrivateMessage";
+                    recipient_id: number;
+                    message: MessageBody;
+                };
+
+                const key = serializeKey(
+                    sendingError.message.sender_id,
+                    sendingError.recipient_id
+                );
+
+                // Cerchiamo il messaggio confrontando più proprietà
+                messages.update((messages) => {
+                    const chatMessages = messages[key];
+                    if (chatMessages) {
+                        // Cerchiamo dall'ultimo messaggio
+                        for (let i = chatMessages.length - 1; i >= 0; i--) {
+                            const msg = chatMessages[i];
+
+                            // Confrontiamo contenuto e timestamp
+                            if (
+                                msg.content.type ===
+                                    sendingError.message.content.type &&
+                                msg.content.data ===
+                                    sendingError.message.content.data &&
+                                msg.timestamp ===
+                                    sendingError.message.timestamp &&
+                                msg.sender_id === sendingError.message.sender_id
+                            ) {
+                                msg.status = "failed";
+                                break;
+                            }
+                        }
+                    }
+                    return messages;
+                });
+            }
+
+            // Show error toast
+            userEvents.update((events) => ({
+                ...events,
+                [wsMessage.client_id]: {
+                    message: message.error,
+                    type: "error",
+                },
+            }));
             break;
     }
 }

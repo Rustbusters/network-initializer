@@ -6,4 +6,5 @@ export interface Message {
     server_id: number;
     content: MessageContent;
     timestamp: string;
+    status?: 'sent' | 'failed';
 }

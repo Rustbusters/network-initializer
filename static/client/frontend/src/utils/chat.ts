@@ -23,7 +23,8 @@ export async function sendMessage(
         timestamp,
         sender_id: senderId,
         receiver_id: receiverId,
-        server_id: serverId
+        server_id: serverId,
+        status: 'sent'
     };
 
     try {
