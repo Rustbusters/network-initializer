@@ -16,7 +16,8 @@ use wg_2024::packet::Packet;
 
 use dotenv::dotenv;
 
-fn main() {
+#[tokio::main]
+async fn main() {
     #![allow(warnings)];
     env_logger::init();
 
@@ -154,9 +155,11 @@ fn main() {
     let server_http_port = env::var("HTTP_SERVER_PORT").expect("HTTP_SERVER_PORT must be set in .env file").parse::<u16>().expect("Error in parsing HTTP_SERVER_PORT from .env");
     let server_websocket_port = env::var("WEBSOCKET_SERVER_PORT").expect("WEBSOCKET_SERVER_PORT must be set in .env file").parse::<u16>().expect("Error in parsing WEBSOCKET_SERVER_PORT from .env");
 
-    let server_controller = RustBustersServerController::new(server_ip, server_http_port, "./static/server/emeliyanov");
-    server_controller.run_ui();
-    server_controller.run_websocket_server();
+    let server_controller: RustBustersServerController = RustBustersServerController::new(server_ip, server_http_port, "static/server/emeliyanov");
+    tokio::spawn(async move {
+        server_controller.launch().await.expect("Error in launching server controller");
+    });
+
     for server in config.server.clone() {
         let (controller_to_server_sender, server_from_controller_receiver) = unbounded();
         let (server_to_controller_sender, controller_from_server_receiver) = unbounded();
@@ -187,7 +190,7 @@ fn main() {
                 packet_send,
                 format!("ws://{}:{}", server_ip.iter().map(|n| n.to_string()).collect::<Vec<String>>().join("."), server_websocket_port),
             );
-            server.run();
+            server.launch();
         });
         handles.push(handle);
     }
