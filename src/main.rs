@@ -3,7 +3,7 @@ use crossbeam_channel::{unbounded, Receiver, Sender};
 use drone::RustBustersDrone;
 use log::info;
 use common_utils::{HostCommand, HostEvent};
-use server::{RustBustersServerController};
+use server::{RustBustersServerController, RustBustersServer};
 use simulation_controller::RustBustersSimulationController;
 use std::collections::HashMap;
 use std::net::Ipv4Addr;
@@ -111,47 +111,46 @@ fn main() {
     }
 
     // TODO: implement initialization for clients and servers
-    //info!("Creating and spawning Clients");
-    //for client in config.client.clone() {
-    //    // TODO: update general host to client
-    //    // Channels for communication between the client and the simulation controller
-    //    let (controller_to_client_sender, client_from_controller_receiver) = unbounded();
-    //    let (client_to_controller_sender, controller_from_client_receiver) = unbounded();
-    //
-    //    client_controller_channels.insert(
-    //        client.id,
-    //        (controller_to_client_sender, controller_from_client_receiver),
-    //    );
-    //
-    //    // Set the channels for the communication between the nodes
-    //    let packet_recv = intra_node_channels.get(&client.id).unwrap().1.clone();
-    //    let mut packet_send = HashMap::new();
-    //
-    //    for neighbour in client.connected_drone_ids {
-    //        packet_send.insert(
-    //            neighbour,
-    //            intra_node_channels.get(&neighbour).unwrap().0.clone(),
-    //        );
-    //    }
-    //
-    //    // Create and spawn new clients
-    //    let handle = thread::spawn(move || {
-    //        let mut client = SimpleHost::new(
-    //            client.id,
-    //            NodeType::Client,
-    //            client_to_controller_sender,
-    //            client_from_controller_receiver,
-    //            packet_recv,
-    //            packet_send,
-    //        );
-    //        client.run();
-    //    });
-    //    handles.push(handle);
-    //}
+    // info!("Creating and spawning Clients");
+    // for client in config.client.clone() {
+    //     // Channels for communication between the client and the simulation controller
+    //     let (controller_to_client_sender, client_from_controller_receiver) = unbounded();
+    //     let (client_to_controller_sender, controller_from_client_receiver) = unbounded();
+
+    //     client_controller_channels.insert(
+    //         client.id,
+    //         (controller_to_client_sender, controller_from_client_receiver),
+    //     );
+
+    //     // Set the channels for the communication between the nodes
+    //     let packet_recv = intra_node_channels.get(&client.id).unwrap().1.clone();
+    //     let mut packet_send = HashMap::new();
+
+    //     for neighbour in client.connected_drone_ids {
+    //         packet_send.insert(
+    //             neighbour,
+    //             intra_node_channels.get(&neighbour).unwrap().0.clone(),
+    //         );
+    //     }
+
+    //     // Create and spawn new clients
+    //     let handle = thread::spawn(move || {
+    //         let mut client = RustbustersClient::new(
+    //             client.id,
+    //             client_to_controller_sender,
+    //             client_from_controller_receiver,
+    //             packet_recv,
+    //             packet_send,
+    //             None,
+    //         );
+    //         client.run();
+    //     });
+    //     handles.push(handle);
+    // }
 
     info!("Creating and spawning Servers");
     let server_ip: [u8; 4] = env::var("SERVER_IP").expect("SERVER_IP must be set in .env file").parse::<Ipv4Addr>().expect("SERVER_IP must be a valid IpV4 IP address").octets();
-    let port = env::var("HTTP_SERVER_PORT").expect("HTTP_SERVER_PORT must be set in .env file").parse::<u16>().expect("Error in parsing HTTP_SERVER_PORT from .env");
+    let port = env::var("SERVER_PORT").expect("SERVER_PORT must be set in .env file").parse::<u16>().expect("Error in parsing HTTP_SERVER_PORT from .env");
 
     let server_controller = RustBustersServerController::new(server_ip, port, "static/server/emeliyanov");
     server_controller.launch();
@@ -177,18 +176,18 @@ fn main() {
         }
 
         // Create and spawn new servers
-        // let handle = thread::spawn(move || {
-        //     let mut server = RustBustersServer::new(
-        //         server.id,
-        //         server_to_controller_sender,
-        //         server_from_controller_receiver,
-        //         packet_recv,
-        //         packet_send,
-        //         format!("ws://{}:{}", server_ip.iter().map(|n| n.to_string()).collect::<Vec<String>>().join("."), server_websocket_port),
-        //     );
-        //     // server.launch();
-        // });
-        // handles.push(handle);
+        let handle = thread::spawn(move || {
+            let mut server = RustBustersServer::new(
+                server.id,
+                server_to_controller_sender,
+                server_from_controller_receiver,
+                packet_recv,
+                packet_send,
+                format!("ws://{}:{}", server_ip.iter().map(|n| n.to_string()).collect::<Vec<String>>().join("."), port+1),
+            );
+            server.launch();
+        });
+        handles.push(handle);
     }
 
     // Create and start the simulation controller

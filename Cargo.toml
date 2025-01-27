@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 wg_2024 = { git = "https://github.com/WGL-2024/WGL_repo_2024.git", features = ["serialize"] }
 simulation-controller = { path = "../simulation-controller" }
+# client = { path = "../client/" }
 server = { path = "../server/" }
 drone = { path = "../drone/" }
 common-utils = { path = "../common-utils/" }
