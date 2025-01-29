@@ -1,8 +1,8 @@
 use client::RustbustersClient;
 use common_utils::{HostCommand, HostEvent};
 use crossbeam_channel::{unbounded, Receiver, Sender};
-use drone::RustBustersDrone;
 use log::info;
+use rustbusters_drone::RustBustersDrone;
 use server::{RustBustersServer, RustBustersServerController};
 use simulation_controller::RustBustersSimulationController;
 use std::collections::HashMap;

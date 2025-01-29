@@ -5,11 +5,13 @@ edition = "2021"
 
 [dependencies]
 wg_2024 = { git = "https://github.com/WGL-2024/WGL_repo_2024.git", features = ["serialize"] }
+#simulation-controller = { git = "https://github.com/Rustbusters/simulation-controller.git" }
 simulation-controller = { path = "../simulation-controller" }
-client = { path = "../client/" }
+client = { git = "https://github.com/Rustbusters/client.git" }
+#server = { git = "https://github.com/Rustbusters/server.git" }
 server = { path = "../server/" }
-drone = { path = "../drone/" }
-common-utils = { path = "../common-utils/" }
+rustbusters-drone = { git = "https://github.com/Rustbusters/drone.git" }
+common-utils = { git = "https://github.com/Rustbusters/common-utils.git" }
 
 crossbeam-channel = "0.5.13"
 toml = "0.8.19"
