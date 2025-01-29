@@ -31,8 +31,8 @@
                 type: event.type,
                 key: Date.now()
             };
+            clearUserEvent(clientId);
         }
-        clearUserEvent(clientId);
     });
 
     // Function to show toast from child components
