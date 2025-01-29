@@ -5,9 +5,9 @@
 
     interface Props {
         clientId: number;
-        showToast: (message: string, type: 'error' | 'success') => void;
+        showToast: (message: string, type: "error" | "success") => void;
     }
-    
+
     let { clientId, showToast }: Props = $props();
 
     let availableServers: number[] = $state([]);
@@ -50,6 +50,10 @@
     // Handle server registration process
     async function handleRegistration() {
         try {
+            pendingRegistrations.update((set) => {
+                set.add(clientId);
+                return set;
+            });
             const response = await fetch("/api/register", {
                 method: "POST",
                 headers: {
@@ -64,21 +68,28 @@
 
             if (response.ok) {
                 showModal = false;
-                clientUsernames.update(usernames => ({
+                clientUsernames.update((usernames) => ({
                     ...usernames,
-                    [clientId]: username
+                    [clientId]: username,
                 }));
                 username = "";
+            } else {
+                // remove client from pending registrations
                 pendingRegistrations.update((set) => {
-                    set.add(clientId);
+                    set.delete(clientId);
                     return set;
                 });
-            } else {
-                showToast(`Registration failed for Server ${selectedServer}. Please try again.`, 'error');
+                showToast(
+                    `Registration failed for Server ${selectedServer}. Please try again.`,
+                    "error"
+                );
             }
         } catch (error) {
             console.error(error);
-            showToast(`Registration failed for Server ${selectedServer}. Please try again.`, 'error');
+            showToast(
+                `Registration failed for Server ${selectedServer}. Please try again.`,
+                "error"
+            );
         }
     }
 

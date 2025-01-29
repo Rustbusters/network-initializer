@@ -46,12 +46,19 @@
     async function handleUnregister() {
         if ($isDisconnecting[clientId]) return;
 
+        // Prima settiamo isDisconnecting
         isDisconnecting.update((state) => ({
             ...state,
             [clientId]: true,
         }));
 
         try {
+            // Qui dovremmo settare pendingUnregistrations PRIMA della chiamata API
+            pendingUnregistrations.update((set) => {
+                set.add(clientId);
+                return set;
+            });
+
             const response = await fetch("/api/unregister", {
                 method: "POST",
                 headers: {
@@ -64,17 +71,17 @@
             });
 
             if (!response.ok) {
+                // Cleanup in caso di errore
                 isDisconnecting.update((state) => ({
                     ...state,
                     [clientId]: false,
                 }));
+                pendingUnregistrations.update((set) => {
+                    set.delete(clientId);
+                    return set;
+                });
                 return;
             }
-
-            pendingUnregistrations.update((set) => {
-                set.add(clientId);
-                return set;
-            });
         } catch (error) {
             console.error("Error unregistering:", error);
             isDisconnecting.update((state) => ({

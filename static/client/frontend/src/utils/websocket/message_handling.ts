@@ -18,6 +18,7 @@ import type { Message } from "../../types/message";
 import type {
     MessageBody,
     ServerToClientMessage,
+    User,
     WebSocketMessage,
 } from "../../types/websocket";
 
@@ -138,14 +139,20 @@ export function handleMessage(wsMessage: WebSocketMessage) {
             break;
 
         case "NewUserRegistered":
+            // Create user object from id and name fields
+            const newUser: User = {
+                id: message.id,
+                name: message.name
+            };
+
             // Update the list of active users
             clientUsers.update((users) => {
-                const newUsers = users[wsMessage.client_id].users;
+                const newUsers = users[wsMessage.client_id]?.users ?? [];
                 return {
                     ...users,
                     [wsMessage.client_id]: {
                         ...users[wsMessage.client_id],
-                        users: [...newUsers, message.user],
+                        users: [...newUsers, newUser],
                     },
                 };
             });
@@ -154,7 +161,7 @@ export function handleMessage(wsMessage: WebSocketMessage) {
             userEvents.update((events) => ({
                 ...events,
                 [wsMessage.client_id]: {
-                    message: `${message.user.name} joined the server`,
+                    message: `${message.name} joined the server`,
                     type: "success",
                 },
             }));
