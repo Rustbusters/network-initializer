@@ -4,3 +4,4 @@
 .env
 Cargo.lock
 node_modules
+*.db
