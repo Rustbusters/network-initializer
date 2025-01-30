@@ -1,7 +1,7 @@
 use client::RustbustersClient;
 use common_utils::{HostCommand, HostEvent};
 use crossbeam_channel::{unbounded, Receiver, Sender};
-use log::info;
+use log::{error, info};
 use rustbusters_drone::RustBustersDrone;
 use server::{RustBustersServer, RustBustersServerController};
 use simulation_controller::RustBustersSimulationController;
@@ -14,6 +14,7 @@ use wg_2024::drone::Drone;
 use wg_2024::network::NodeId;
 use wg_2024::packet::Packet;
 
+use crate::utils;
 use dotenv::dotenv;
 
 pub struct NetworkInitializer {
@@ -59,6 +60,13 @@ impl NetworkInitializer {
 
         let config_data = fs::read_to_string("input.toml").expect("Unable to read config file");
         let config: Config = toml::from_str(&config_data).expect("Unable to parse TOML");
+
+        if let Err(error_message) = utils::input_validator::validate_config(&config) {
+            error!("{}", error_message);
+            println!("ERROR: {}", error_message);
+            return ();
+        }
+
         self.config = Some(config);
     }
 
