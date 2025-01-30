@@ -1,4 +1,5 @@
 mod network_initializer;
+mod utils;
 
 use network_initializer::NetworkInitializer;
 
