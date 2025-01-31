@@ -93,6 +93,39 @@
         }
     }
 
+    async function cancelRegistration() {
+        try {
+            const response = await fetch("/api/unregister", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    client_id: clientId,
+                    server_id: selectedServer,
+                }),
+            });
+
+            if (response.ok) {
+                pendingRegistrations.update((set) => {
+                    set.delete(clientId);
+                    return set;
+                });
+            } else {
+                showToast(
+                    `Failed to cancel registration. Please try again.`,
+                    "error"
+                );
+            }
+        } catch (error) {
+            console.error(error);
+            showToast(
+                `Failed to cancel registration. Please try again.`,
+                "error"
+            );
+        }
+    }
+
     function closeModal() {
         showModal = false;
         username = "";
@@ -126,9 +159,15 @@
                 <LoaderCircle
                         class="size-8 animate-spin mx-auto mb-4 text-blue-500"
                 />
-                <p class="text-gray-600 dark:text-gray-300">
+                <p class="text-gray-600 dark:text-gray-300 mb-4">
                     Registering to server...
                 </p>
+                <button
+                        class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                        onclick={cancelRegistration}
+                >
+                    Cancel
+                </button>
             </div>
         </div>
     {:else}
