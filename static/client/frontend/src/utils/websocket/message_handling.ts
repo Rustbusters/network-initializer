@@ -1,4 +1,4 @@
-import { get } from "svelte/store";
+import {get} from "svelte/store";
 import {
     clientUsernames,
     currentChats,
@@ -12,15 +12,10 @@ import {
     serializeKey,
     unreadMessages,
 } from "../../stores/store";
-import { clientUsers, isUserPresent, setUsers } from "../../stores/users";
-import { userEvents } from "../../stores/events";
-import type { Message } from "../../types/message";
-import type {
-    MessageBody,
-    ServerToClientMessage,
-    User,
-    WebSocketMessage,
-} from "../../types/websocket";
+import {clientUsers, isUserPresent, setUsers} from "../../stores/users";
+import {userEvents} from "../../stores/events";
+import type {Message} from "../../types/message";
+import type {MessageBody, ServerToClientMessage, User, WebSocketMessage,} from "../../types/websocket";
 
 export function handleMessage(wsMessage: WebSocketMessage) {
     const message = wsMessage.message as ServerToClientMessage;
@@ -45,7 +40,7 @@ export function handleMessage(wsMessage: WebSocketMessage) {
                 return set;
             });
             clientUsernames.update((usernames) => {
-                const { [wsMessage.client_id]: _, ...rest } = usernames;
+                const {[wsMessage.client_id]: _, ...rest} = usernames;
                 return rest;
             });
 
@@ -69,7 +64,7 @@ export function handleMessage(wsMessage: WebSocketMessage) {
 
                 // Clear all data related to this client
                 registrationStatus.update((status) => {
-                    const { [wsMessage.client_id]: _, ...rest } = status;
+                    const {[wsMessage.client_id]: _, ...rest} = status;
                     return rest;
                 });
 
@@ -79,7 +74,7 @@ export function handleMessage(wsMessage: WebSocketMessage) {
                 });
 
                 clientUsernames.update((usernames) => {
-                    const { [wsMessage.client_id]: _, ...rest } = usernames;
+                    const {[wsMessage.client_id]: _, ...rest} = usernames;
                     return rest;
                 });
 
@@ -87,7 +82,7 @@ export function handleMessage(wsMessage: WebSocketMessage) {
                 messages.update((messages) => {
                     const newMessages: Record<string, Message[]> = {};
                     for (const key in messages) {
-                        const { displayer } = deserializeKey(key);
+                        const {displayer} = deserializeKey(key);
                         if (displayer !== wsMessage.client_id) {
                             newMessages[key] = messages[key];
                         }
@@ -97,13 +92,13 @@ export function handleMessage(wsMessage: WebSocketMessage) {
 
                 // Clear unread messages
                 unreadMessages.update((state) => {
-                    const { [wsMessage.client_id]: _, ...rest } = state;
+                    const {[wsMessage.client_id]: _, ...rest} = state;
                     return rest;
                 });
 
                 // Clear current chat
                 currentChats.update((state) => {
-                    const { [wsMessage.client_id]: _, ...rest } = state;
+                    const {[wsMessage.client_id]: _, ...rest} = state;
                     return rest;
                 });
             }
@@ -127,8 +122,6 @@ export function handleMessage(wsMessage: WebSocketMessage) {
             break;
 
         case "ActiveUsersList":
-            console.log("ActiveUsersList", message.users);
-
             // remove myself from the list of active users
             let users = message.users.filter(
                 (user) => user.id !== wsMessage.client_id
@@ -200,7 +193,7 @@ export function handleMessage(wsMessage: WebSocketMessage) {
             // Clear current chat if the unregistered user is the current chat
             currentChats.update((state) => {
                 if (state[wsMessage.client_id] === message.id) {
-                    const { [wsMessage.client_id]: _, ...rest } = state;
+                    const {[wsMessage.client_id]: _, ...rest} = state;
                     return rest;
                 }
                 return state;
@@ -268,11 +261,11 @@ export function handleMessage(wsMessage: WebSocketMessage) {
                             // Confrontiamo contenuto e timestamp
                             if (
                                 msg.content.type ===
-                                    sendingError.message.content.type &&
+                                sendingError.message.content.type &&
                                 msg.content.data ===
-                                    sendingError.message.content.data &&
+                                sendingError.message.content.data &&
                                 msg.timestamp ===
-                                    sendingError.message.timestamp &&
+                                sendingError.message.timestamp &&
                                 msg.sender_id === sendingError.message.sender_id
                             ) {
                                 msg.status = "failed";
