@@ -17,7 +17,7 @@ import {userEvents} from "../../stores/events";
 import type {Message} from "../../types/message";
 import type {MessageBody, ServerToClientMessage, User, WebSocketMessage,} from "../../types/websocket";
 
-export function handleMessage(wsMessage: WebSocketMessage) {
+export async function handleMessage(wsMessage: WebSocketMessage) {
     const message = wsMessage.message as ServerToClientMessage;
     switch (message.response) {
         case "RegistrationSuccess":
