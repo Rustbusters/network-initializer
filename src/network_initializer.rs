@@ -185,22 +185,15 @@ impl NetworkInitializer {
 
     fn launch_servers(&mut self) {
         if let Some(config) = &self.config {
-            // Set up each server
             info!("Creating and spawning Servers");
-            let server_ip: [u8; 4] = env::var("SERVER_IP")
-                .expect("SERVER_IP must be set in .env file")
-                .parse::<Ipv4Addr>()
-                .expect("SERVER_IP must be a valid IpV4 IP address")
-                .octets();
-            let port = env::var("SERVER_PORT")
-                .expect("SERVER_PORT must be set in .env file")
-                .parse::<u16>()
-                .expect("Error in parsing HTTP_SERVER_PORT from .env");
-            let server_public_path = env::var("SERVER_PUBLIC_PATH")
-                .expect("SERVER_PUBLIC_PATH must be set in .env file");
 
-            let server_controller =
-                RustBustersServerController::new(server_ip, port, server_public_path);
+            let (http_server_address, http_public_path, ws_server_address) =
+                self.config_server_controller();
+            let server_controller = RustBustersServerController::new(
+                http_server_address,
+                http_public_path,
+                ws_server_address,
+            );
             server_controller.launch();
 
             for server in config.server.clone() {
@@ -229,17 +222,8 @@ impl NetworkInitializer {
                         server.id,
                         server_to_controller_sender,
                         server_from_controller_receiver,
-                        packet_recv,
                         packet_send,
-                        format!(
-                            "ws://{}:{}",
-                            server_ip
-                                .iter()
-                                .map(|n| n.to_string())
-                                .collect::<Vec<String>>()
-                                .join("."),
-                            port + 1
-                        ),
+                        packet_recv,
                         None,
                     );
                     server.launch();
@@ -247,6 +231,31 @@ impl NetworkInitializer {
                 self.handles.push(handle);
             }
         }
+    }
+
+    /// Configures the server controller by returning (http_server_address, http_public_path, ws_server_address)
+    fn config_server_controller(&self) -> (String, String, String) {
+        let server_ip: [u8; 4] = env::var("SERVER_IP")
+            .expect("SERVER_IP must be set in .env file")
+            .parse::<Ipv4Addr>()
+            .expect("SERVER_IP must be a valid IpV4 IP address")
+            .octets();
+        let port = env::var("SERVER_PORT")
+            .expect("SERVER_PORT must be set in .env file")
+            .parse::<u16>()
+            .expect("Error in parsing HTTP_SERVER_PORT from .env");
+        let http_public_path =
+            env::var("SERVER_PUBLIC_PATH").expect("SERVER_PUBLIC_PATH must be set in .env file");
+
+        let ip_str: String = server_ip
+            .iter()
+            .map(|n| n.to_string())
+            .collect::<Vec<String>>()
+            .join(".");
+        let http_server_address = format!("{}:{}", ip_str, port);
+        let ws_server_address = format!("{}:{}", ip_str, port + 1);
+
+        (http_server_address, http_public_path, ws_server_address)
     }
 
     fn launch_simulation_controller(self) {
