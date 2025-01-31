@@ -32,12 +32,14 @@ export function initializeWebSocket() {
     };
 
     ws.onmessage = function (event) {
-        console.log("WebSocket message received:", event.data);
+        try {
+            const data = JSON.parse(event.data.toString()) as WebSocketMessage;
+            console.info(`[WS] ${data.message.response}`, data);
 
-        const data = JSON.parse(event.data.toString()) as WebSocketMessage;
-        console.log("WebSocket message parsed:", data);
-
-        handleMessage(data);
+            handleMessage(data);
+        } catch (e) {
+            console.warn("Error parsing WebSocket message:", e);
+        }
     };
 
     return ws;
