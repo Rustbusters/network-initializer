@@ -15,7 +15,7 @@ common-utils = { git = "https://github.com/Rustbusters/common-utils.git" }
 # simulation-controller = { path = "../simulation-controller" }
 # rustbusters-drone = { path = "../drone" }
 # client = { path = "../client" }
-# server = { path = "../server" }
+#server = { path = "../server" }
 # common-utils = { path = "../common-utils" }
 
 crossbeam-channel = "0.5.13"

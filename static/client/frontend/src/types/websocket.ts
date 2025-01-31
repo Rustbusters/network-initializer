@@ -17,9 +17,9 @@ export interface MessageBody {
 
 export type ServerToClientMessage =
     | { response: "RegistrationSuccess" }
-    | { response: "RegistrationFailure" }
+    | { response: "RegistrationFailure"; reason: string }
     | { response: "UnregisterSuccess" }
-    | { response: "UnregisterFailure" }
+    | { response: "UnregisterFailure"; reason: string }
     | { response: "ActiveUsersList"; users: User[] }
     | { response: "NewUserRegistered"; id: UserId; name: string; }
     | { response: "UserUnregistered"; id: UserId }
