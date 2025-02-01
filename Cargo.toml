@@ -9,13 +9,14 @@ wg_2024 = { git = "https://github.com/WGL-2024/WGL_repo_2024.git", features = ["
 simulation-controller = { git = "https://github.com/Rustbusters/simulation-controller.git", branch = "dev/common" }
 rustbusters-drone = { git = "https://github.com/Rustbusters/drone.git" }
 client = { git = "https://github.com/Rustbusters/client.git" }
-# server = { git = "https://github.com/Rustbusters/server.git" }
+server = { git = "https://github.com/Rustbusters/server.git" }
 common-utils = { git = "https://github.com/Rustbusters/common-utils.git" }
 
 # simulation-controller = { path = "../simulation-controller" }
 # rustbusters-drone = { path = "../drone" }
 # client = { path = "../client" }
-server = { path = "../server" }
+# server = { path = "../server" }
+>>>>>>> c29a46e7cfcf153d9a287a88df9804b97cd974ad
 # common-utils = { path = "../common-utils" }
 
 crossbeam-channel = "0.5.13"

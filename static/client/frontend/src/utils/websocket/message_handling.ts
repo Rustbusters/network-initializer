@@ -48,7 +48,7 @@ export async function handleMessage(wsMessage: WebSocketMessage) {
             userEvents.update((events) => ({
                 ...events,
                 [wsMessage.client_id]: {
-                    message: `Failed to register to server. Please try again.`,
+                    message: message.reason,
                     type: "error",
                 },
             }));
@@ -118,6 +118,15 @@ export async function handleMessage(wsMessage: WebSocketMessage) {
                     set.delete(wsMessage.client_id);
                     return set;
                 });
+                
+                // Emit event for unregister failure
+                userEvents.update((events) => ({
+                    ...events,
+                    [wsMessage.client_id]: {
+                        message: message.reason,
+                        type: "error",
+                    },
+                }));
             }
             break;
 
