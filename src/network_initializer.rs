@@ -3,6 +3,7 @@ use common_utils::{HostCommand, HostEvent};
 use crossbeam_channel::{unbounded, Receiver, Sender};
 use log::{error, info};
 use rustbusters_drone::RustBustersDrone;
+use server::utils::traits::Runnable;
 use server::{RustBustersServer, RustBustersServerController};
 use simulation_controller::RustBustersSimulationController;
 use std::collections::HashMap;
@@ -194,7 +195,7 @@ impl NetworkInitializer {
                 http_public_path,
                 ws_server_address,
             );
-            server_controller.launch();
+            server_controller.run();
 
             for server in config.server.clone() {
                 let (controller_to_server_sender, server_from_controller_receiver) = unbounded();
@@ -217,17 +218,15 @@ impl NetworkInitializer {
                 }
 
                 // Create and spawn new servers
-                let handle = thread::spawn(move || {
-                    let mut server = RustBustersServer::new(
-                        server.id,
-                        server_to_controller_sender,
-                        server_from_controller_receiver,
-                        packet_send,
-                        packet_recv,
-                        None,
-                    );
-                    server.launch();
-                });
+                let server = RustBustersServer::new(
+                    server.id,
+                    server_to_controller_sender,
+                    server_from_controller_receiver,
+                    packet_send,
+                    packet_recv,
+                    None,
+                );
+                let handle = server.run().unwrap();
                 self.handles.push(handle);
             }
         }
