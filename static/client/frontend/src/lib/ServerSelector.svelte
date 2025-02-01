@@ -25,7 +25,7 @@
         try {
             let response = await fetch(`/api/servers?id=${clientId}`);
             availableServers = await response.json();
-            availableServers = availableServers.sort((a, b) => a - b);
+            console.log("Servers: ", availableServers.join(", "));
         } catch (e) {
             console.error(e);
             availableServers = [];

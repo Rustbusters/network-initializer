@@ -33,16 +33,20 @@
     function unregisterClients() {
         console.error("Unregistering clients...");
         $displayedChats.forEach((clientId) => {
-            fetch("/api/unregister", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    client_id: clientId,
-                    server_id: $registrationStatus[clientId],
-                }),
-            });
+            // Verifichiamo che il client sia registrato (serverId != undefined e >= 0)
+            const serverId = $registrationStatus[clientId];
+            if (serverId !== undefined && serverId >= 0) {
+                fetch("/api/unregister", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        client_id: clientId,
+                        server_id: serverId,
+                    }),
+                });
+            }
         });
         console.warn("Clients unregistered.");
     }
