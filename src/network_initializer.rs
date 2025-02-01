@@ -15,8 +15,21 @@ use wg_2024::drone::Drone;
 use wg_2024::network::NodeId;
 use wg_2024::packet::Packet;
 
-use crate::utils;
+use crate::drone_factory::{DroneFactory, DroneRunnable};
+use crate::{drone_factories, utils};
 use dotenv::dotenv;
+
+// DRONES
+/*use ap2024_unitn_cppenjoyers_drone::CppEnjoyersDrone;
+use fungi_drone::FungiDrone;
+use lockheedrustin_drone::LockheedRustin;
+use rust_do_it::RustDoIt;
+use rust_roveri::RustRoveri;
+use rustastic_drone::RustasticDrone;
+use rusteze_drone::RustezeDrone;
+use rusty_drones::RustyDrone;
+use wg_2024_rust::drone::RustDrone;
+use RF_drone::RustAndFurious;*/
 
 pub struct NetworkInitializer {
     drone_ids: Vec<NodeId>,
@@ -104,6 +117,23 @@ impl NetworkInitializer {
         if let Some(config) = &self.config {
             // Set up each drone
             info!("Creating and spawning Drones");
+
+            let drone_factories: Vec<DroneFactory> = drone_factories![
+                RustBustersDrone,
+                /* TODO: Remove RustBustersDrone
+                RustyDrone,
+                LockheedRustin,
+                FungiDrone,
+                RustasticDrone,
+                RustezeDrone,
+                RustDoIt,
+                RustRoveri,
+                RustAndFurious,
+                CppEnjoyersDrone,
+                RustDrone,*/
+            ];
+            let mut factory_index = 0;
+
             for drone in config.drone.clone() {
                 // Channels for communication between the drone and the simulation controller
                 let (controller_to_drone_sender, drone_from_controller_receiver) = unbounded();
@@ -125,16 +155,22 @@ impl NetworkInitializer {
                     );
                 }
 
+                let create_drone = &drone_factories[factory_index];
+                factory_index = (factory_index + 1) % drone_factories.len();
+
+                let new_drone = create_drone(
+                    drone.id,
+                    drone_to_controller_sender, // The drone can send events here
+                    drone_from_controller_receiver, // The drone receives commands here
+                    packet_recv,
+                    packet_send,
+                    drone.pdr,
+                );
+                info!("Type of Drone {}: {}", drone.id, new_drone.drone_type());
+
                 let handle = thread::spawn(move || {
-                    let mut drone = RustBustersDrone::new(
-                        drone.id,
-                        drone_to_controller_sender,
-                        drone_from_controller_receiver,
-                        packet_recv,
-                        packet_send,
-                        drone.pdr,
-                    );
-                    drone.run();
+                    let mut current_drone = new_drone;
+                    current_drone.run();
                 });
 
                 self.handles.push(handle);
