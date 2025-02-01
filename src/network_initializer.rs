@@ -120,8 +120,8 @@ impl NetworkInitializer {
 
             let drone_factories: Vec<DroneFactory> = drone_factories![
                 RustBustersDrone,
-                /* TODO: Remove RustBustersDrone
-                RustyDrone,
+                // TODO: Remove RustBustersDrone
+                /*RustyDrone,
                 LockheedRustin,
                 FungiDrone,
                 RustasticDrone,
