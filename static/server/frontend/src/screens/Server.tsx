@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import PieChart from "../components/PieChart"
 import LineChart from "../components/LineChart"
 import BarChart from "../components/BarChart"
@@ -124,10 +124,12 @@ const Table = <T,>({ data, columns, rowsPerPage = 5 }: TableProps<T>) => {
                                 </thead>
                                 <tbody className="w-full h-[420px] divide-y divide-gray-200 dark:divide-neutral-700">
                                     {paginatedData.map((item, index) => (
-                                        <tr key={index} className="max-h-[80px]">
+                                        <tr key={index} className="h-[80px]">
                                             {columns.map((col) => (
-                                                <td key={String(col.key)} className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">
-                                                    {col.render ? col.render(item[col.key], item) : String(item[col.key])}
+                                                <td key={String(col.key)} className="px-6 py-4 w-[25vw] h-[80px] max-h-[80px] overflow-y-scroll text-sm text-gray-800 dark:text-neutral-200">
+                                                    {col.key != "message" ? (col.render ? col.render(item[col.key], item) : String(item[col.key])) :
+                                                        <ExpandableCell content={col.render ? col.render(item[col.key], item) : String(item[col.key])} />
+                                                    }
                                                 </td>
                                             ))}
                                         </tr>
@@ -144,6 +146,42 @@ const Table = <T,>({ data, columns, rowsPerPage = 5 }: TableProps<T>) => {
                 </div>
             </div> : <div className="w-full h-full text-slate-500">No data to display</div>}
         </React.Fragment>
+    );
+};
+
+const ExpandableCell = ({ content }: { content: any }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [isOverflowing, setIsOverflowing] = useState(false);
+    const contentRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (contentRef.current) {
+            setIsOverflowing(contentRef.current.scrollHeight > contentRef.current.clientHeight);
+        }
+    }, [content]);
+
+    return (
+        <div className="relative">
+            {/* Content Container */}
+            <div
+                ref={contentRef}
+                className={`overflow-hidden transition-all ${isExpanded ? "max-h-full" : "max-h-[4.5rem]"
+                    }`}
+                style={{ lineHeight: "1.5rem" }} // 3 lines max initially
+            >
+                {content}
+            </div>
+
+            {/* Show More / Show Less Button */}
+            {isOverflowing && (
+                <button
+                    className="text-blue-500 text-xs mt-1 underline"
+                    onClick={() => setIsExpanded(!isExpanded)}
+                >
+                    {isExpanded ? "Show Less" : "Show More"}
+                </button>
+            )}
+        </div>
     );
 };
 
