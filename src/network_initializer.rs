@@ -6,6 +6,7 @@ use rustbusters_drone::RustBustersDrone;
 use server::utils::traits::Runnable;
 use server::{RustBustersServer, RustBustersServerController};
 use simulation_controller::RustBustersSimulationController;
+use std::any::Any;
 use std::collections::HashMap;
 use std::net::Ipv4Addr;
 use std::{env, fs, thread};
@@ -224,12 +225,18 @@ impl NetworkInitializer {
         if let Some(config) = &self.config {
             info!("Creating and spawning Servers");
 
-            let (http_server_address, http_public_path, ws_server_address) =
-                self.config_server_controller();
+            let (
+                http_server_address,
+                http_public_path,
+                ws_server_address,
+                server_controller_sender,
+                server_controller_receiver,
+            ) = self.config_server_controller();
             let server_controller = RustBustersServerController::new(
                 http_server_address,
                 http_public_path,
                 ws_server_address,
+                server_controller_receiver,
             );
             server_controller.run();
 
@@ -260,8 +267,10 @@ impl NetworkInitializer {
                     server_from_controller_receiver,
                     packet_send,
                     packet_recv,
+                    server_controller_sender.clone(),
                     None,
                 );
+
                 let handle = server.run().unwrap();
                 self.handles.push(handle);
             }
@@ -269,7 +278,15 @@ impl NetworkInitializer {
     }
 
     /// Configures the server controller by returning (http_server_address, http_public_path, ws_server_address)
-    fn config_server_controller(&self) -> (String, String, String) {
+    fn config_server_controller(
+        &self,
+    ) -> (
+        String,
+        String,
+        String,
+        Sender<HostCommand>,
+        Receiver<HostCommand>,
+    ) {
         let server_ip: [u8; 4] = env::var("SERVER_IP")
             .expect("SERVER_IP must be set in .env file")
             .parse::<Ipv4Addr>()
@@ -290,7 +307,15 @@ impl NetworkInitializer {
         let http_server_address = format!("{}:{}", ip_str, port);
         let ws_server_address = format!("{}:{}", ip_str, port + 1);
 
-        (http_server_address, http_public_path, ws_server_address)
+        let (sender, receiver) = unbounded::<HostCommand>(); // Channel for Network Server-Controller communication
+
+        (
+            http_server_address,
+            http_public_path,
+            ws_server_address,
+            sender,
+            receiver,
+        )
     }
 
     fn launch_simulation_controller(self) {
