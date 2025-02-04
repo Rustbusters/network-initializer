@@ -1,6 +1,5 @@
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import PieChart from "../components/PieChart"
-import LineChart from "../components/LineChart"
 import BarChart from "../components/BarChart"
 
 import { GlobalStateContext } from '../GlobalState';

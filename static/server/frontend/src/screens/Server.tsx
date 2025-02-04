@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
 import PieChart from "../components/PieChart"
-import LineChart from "../components/LineChart"
 import BarChart from "../components/BarChart"
 import Title from '../components/common/Title';
 
@@ -112,21 +111,21 @@ const Table = <T,>({ data, columns, rowsPerPage = 5 }: TableProps<T>) => {
                 <div className="-m-1.5 overflow-x-auto">
                     <div className="p-1.5 min-w-full inline-block align-middle">
                         <div className="overflow-hidden">
-                            <table className="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
+                            <table className="min-w-full divide-y divide-gray-200">
                                 <thead>
                                     <tr>
                                         {columns.map((col) => (
-                                            <th key={String(col.key)} className="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-500">
+                                            <th key={String(col.key)} className="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">
                                                 {col.label}
                                             </th>
                                         ))}
                                     </tr>
                                 </thead>
-                                <tbody className="w-full h-[420px] divide-y divide-gray-200 dark:divide-neutral-700">
+                                <tbody className="w-full h-[420px] divide-y divide-gray-200">
                                     {paginatedData.map((item, index) => (
                                         <tr key={index} className="h-[80px]">
                                             {columns.map((col) => (
-                                                <td key={String(col.key)} className="px-6 py-4 w-[25vw] h-[80px] max-h-[80px] overflow-y-scroll text-sm text-gray-800 dark:text-neutral-200">
+                                                <td key={String(col.key)} className="px-6 py-4 w-[25vw] h-[80px] max-h-[80px] overflow-y-scroll text-sm text-gray-800">
                                                     {col.key != "message" ? (col.render ? col.render(item[col.key], item) : String(item[col.key])) :
                                                         <ExpandableCell content={col.render ? col.render(item[col.key], item) : String(item[col.key])} />
                                                     }

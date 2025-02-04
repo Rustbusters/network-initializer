@@ -13,6 +13,10 @@ const Sidebar = () => {
     const { availableServers } = useContext(GlobalStateContext);
     const [curPage, setCurPage] = useState<string>(getCurrentPathName());
 
+    useEffect(() => {
+        setCurPage(getCurrentPathName());
+    }, []);
+
     const getStyles = (page: string) => page === curPage ? "flex space-x-2 text-white bg-indigo-600 flex items-center px-4 py-2.5 text-sm font-medium transition-all duration-200 rounded-lg group" : "space-x-2 text-slate-900 flex items-center px-4 py-2.5 text-sm font-medium transition-all duration-200 rounded-lg group";
 
     return (
@@ -21,7 +25,7 @@ const Sidebar = () => {
                 <div className="relative text-white w-64 min-h-screen p-4">
                     <Logo />
                     <div className="flex items-center flex-shrink-0 px-4">
-                        <span className="text-md text-slate-500 dark:text-white">Ilya's Rustbusters Server</span>
+                        <span className="text-md text-slate-500">Ilya's Rustbusters Server</span>
                     </div>
 
                     <div className="px-4 mt-6">
@@ -43,7 +47,7 @@ const Sidebar = () => {
                             <hr className="border-gray-200" />
 
                             <nav className="flex-1 space-y-2">
-                                <button onClick={() => { setIsServersOpen(!isServersOpen); setCurPage("servers"); }} className="w-full text-start flex items-center px-4 py-2.5 text-sm font-medium transition-all duration-200 rounded-lg group text-slate-900 dark:text-white hover:bg-gray-100 dark:hover:bg-neutral-700">
+                                <button onClick={() => { setIsServersOpen(!isServersOpen); setCurPage("servers"); }} className="w-full text-start flex items-center px-4 py-2.5 text-sm font-medium transition-all duration-200 rounded-lg group text-slate-900 hover:bg-gray-100">
                                     <div className="flex space-x-2">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 0 1-3-3m3 3a3 3 0 1 0 0 6h13.5a3 3 0 1 0 0-6m-16.5-3a3 3 0 0 1 3-3h13.5a3 3 0 0 1 3 3m-19.5 0a4.5 4.5 0 0 1 .9-2.7L5.737 5.1a3.375 3.375 0 0 1 2.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 0 1 .9 2.7m0 0a3 3 0 0 1-3 3m0 3h.008v.008h-.008v-.008Zm0-6h.008v.008h-.008v-.008Zm-3 6h.008v.008h-.008v-.008Zm0-6h.008v.008h-.008v-.008Z" />
