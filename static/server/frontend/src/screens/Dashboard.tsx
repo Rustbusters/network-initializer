@@ -33,7 +33,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
     }, [totalStats]);
 
     return (
-        <div className="p-8 flex flex-1 bg-gray-50">
+        <div className="p-8 flex flex-1 bg-gray-50 dark:bg-black">
             <div className="flex flex-col flex-1 overflow-y-scroll">
                 <main>
                     <Title title="Dashboard" label="Here you can check the server's performance, messages/fragments sent/received." />
