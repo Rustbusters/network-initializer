@@ -38,6 +38,18 @@ const BarChart: React.FC<ChartProps> = ({ stats }) => {
         ],
     };
 
+    let floodData = {
+        labels: ['Flood Requests Sent', 'Flood Requests Received', 'Flood Responses Sent', 'Flood Responses Received'],
+        datasets: [
+            {
+                label: 'Flood',
+                data: [stats.floodRequestsSent, stats.floodRequestsReceived, stats.floodResponsesSent, stats.floodResponsesReceived],
+                backgroundColor: ['#820263', '#d90368', '#ddfff7', '#93e1d8'],
+                hoverBackgroundColor: ['#ab1187', '#bd1a97', '#a8d9cd', '#71d4c8'],
+            },
+        ],
+    };
+
     useEffect(() => {
         messagesData.datasets[0].data = [stats.messagesSent, stats.messagesReceived];
         packetData.datasets[0].data = [stats.messageFragmentsSent, stats.messageFragmentsReceived, stats.nacksReceived];
@@ -69,6 +81,19 @@ const BarChart: React.FC<ChartProps> = ({ stats }) => {
                 </h2>
                 <div className="w-full h-56 sm:h-72 md:h-96">
                     <Bar data={packetData} />
+                </div>
+            </div>
+            <div className="flex flex-1 flex-col">
+                <h2 className="flex items-center space-x-2 text-lg font-semibold mb-4 text-slate-600 dark:text-slate-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6a7.5 7.5 0 1 0 7.5 7.5h-7.5V6Z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0 0 13.5 3v7.5Z" />
+                    </svg>
+
+                    <span>Flooding Chart</span>
+                </h2>
+                <div className="w-full h-56 sm:h-72 md:h-96">
+                    <Bar data={floodData} />
                 </div>
             </div>
         </div>
