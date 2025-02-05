@@ -321,6 +321,22 @@ impl NetworkInitializer {
     fn launch_simulation_controller(self) {
         // Create and start the simulation controller
         if let Some(config) = &self.config {
+            let server_ip: [u8; 4] = env::var("SERVER_IP")
+                .expect("SERVER_IP must be set in .env file")
+                .parse::<Ipv4Addr>()
+                .expect("SERVER_IP must be a valid IpV4 IP address")
+                .octets();
+            let port = env::var("SERVER_PORT")
+                .expect("SERVER_PORT must be set in .env file")
+                .parse::<u16>()
+                .expect("Error in parsing HTTP_SERVER_PORT from .env");
+
+            let ip_str: String = server_ip
+                .iter()
+                .map(|n| n.to_string())
+                .collect::<Vec<String>>()
+                .join(".");
+            let server_ui_url = format!("http:/{}:{}", ip_str, port);
             info!("Creating and spawning Simulation Controller");
             let params = simulation_controller::SimulationControllerParams {
                 handles: self.handles,
@@ -331,6 +347,7 @@ impl NetworkInitializer {
                 drones: config.drone.clone(),
                 clients: config.client.clone(),
                 servers: config.server.clone(),
+                server_ui_url,
             };
             let sim_controller = RustBustersSimulationController::new(params);
 
