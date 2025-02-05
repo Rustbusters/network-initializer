@@ -21,11 +21,20 @@ const Dashboard: React.FC<DashboardProps> = () => {
             // Initialize the combinedStats by reducing totalStats
             const combinedStats = Array.from(totalStats.values()).reduce((acc, stats) => ({
                 messagesSent: acc.messagesSent + stats.messagesSent,
-                fragmentsSent: acc.fragmentsSent + stats.fragmentsSent,
                 messagesReceived: acc.messagesReceived + stats.messagesReceived,
-                fragmentsReceived: acc.fragmentsReceived + stats.fragmentsReceived,
+
+                messageFragmentsSent: acc.messageFragmentsSent + stats.messageFragmentsSent,
+                messageFragmentsReceived: acc.messageFragmentsReceived + stats.messageFragmentsReceived,
+
+                floodRequestsSent: acc.floodRequestsSent + stats.floodRequestsSent,
+                floodRequestsReceived: acc.floodRequestsReceived + stats.floodRequestsReceived,
+
+                floodResponsesSent: acc.floodResponsesSent + stats.floodResponsesSent,
+                floodResponsesReceived: acc.floodResponsesReceived + stats.floodResponsesReceived,
+
                 acksSent: acc.acksSent + stats.acksSent,
                 acksReceived: acc.acksReceived + stats.acksReceived,
+
                 nacksReceived: acc.nacksReceived + stats.nacksReceived,
             }), defaultStats);
             setCombinedStats(combinedStats);

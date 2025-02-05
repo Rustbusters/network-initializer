@@ -25,12 +25,12 @@ const BarChart: React.FC<ChartProps> = ({ stats }) => {
         ],
     };
 
-    let fragmentsData = {
+    let packetData = {
         labels: ['Msg Fragments Sent', 'Msg Fragments Received', 'Acks Sent', 'Acks Received', 'Nacks Received'],
         datasets: [
             {
                 label: 'Packets',
-                data: [stats.fragmentsSent, stats.fragmentsReceived, stats.acksSent, stats.acksReceived, stats.nacksReceived],
+                data: [stats.messageFragmentsSent, stats.messageFragmentsReceived, stats.acksSent, stats.acksReceived, stats.nacksReceived],
                 backgroundColor: ['#72BAA9', '#D5E7B5', '#526cff', '#7BC9FF', '#D20062'],
                 hoverBackgroundColor: ['#3fb598', '#b7d186', '#3950c2', '#4fa5de', '#ab1f62'],
                 // hoverBackgroundColor: ['#89dfca', '#b5d57b', '#c06232'],
@@ -40,7 +40,7 @@ const BarChart: React.FC<ChartProps> = ({ stats }) => {
 
     useEffect(() => {
         messagesData.datasets[0].data = [stats.messagesSent, stats.messagesReceived];
-        fragmentsData.datasets[0].data = [stats.fragmentsSent, stats.fragmentsReceived, stats.nacksReceived];
+        packetData.datasets[0].data = [stats.messageFragmentsSent, stats.messageFragmentsReceived, stats.nacksReceived];
     }, [stats]);
 
     return (
@@ -68,7 +68,7 @@ const BarChart: React.FC<ChartProps> = ({ stats }) => {
                     <span>Fragments Chart</span>
                 </h2>
                 <div className="w-full h-56 sm:h-72 md:h-96">
-                    <Bar data={fragmentsData} />
+                    <Bar data={packetData} />
                 </div>
             </div>
         </div>

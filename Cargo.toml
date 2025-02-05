@@ -9,7 +9,7 @@ wg_2024 = { git = "https://github.com/WGL-2024/WGL_repo_2024.git", features = ["
 simulation-controller = { git = "https://github.com/Rustbusters/simulation-controller.git" }
 client = { git = "https://github.com/Rustbusters/client.git" }
 server = { git = "https://github.com/Rustbusters/server.git" }
-common-utils = { git = "https://github.com/Rustbusters/common-utils.git" }
+common-utils = { git = "https://github.com/Rustbusters/common-utils.git", branch = "feature/new-stats" }
 
 # DRONES
 # TODO: Remove our drone and add the other drones

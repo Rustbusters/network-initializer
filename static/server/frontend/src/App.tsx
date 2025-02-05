@@ -43,10 +43,16 @@ const App: React.FC<AppProps> = () => {
     // Validate stats structure
     const newStats: StatsType = {
       messagesSent: stats["messages_sent"],
-      fragmentsSent: stats["fragments_sent"],
-
       messagesReceived: stats["messages_received"],
-      fragmentsReceived: stats["fragments_received"],
+
+      messageFragmentsSent: stats["message_fragments_sent"],
+      messageFragmentsReceived: stats["message_fragments_received"],
+
+      floodRequestsSent: stats["flood_requests_sent"],
+      floodRequestsReceived: stats["flood_requests_received"],
+
+      floodResponsesSent: stats["flood_responses_sent"],
+      floodResponsesReceived: stats["flood_responses_received"],
 
       acksSent: stats["acks_sent"],
       acksReceived: stats["acks_received"],
