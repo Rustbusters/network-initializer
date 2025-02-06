@@ -20,7 +20,7 @@ jobs:
 
       - name: Copia la cartella aggiornata
         run: |
-          rsync -av --delete static/ react-sc/tauri-src/static/
+          rsync -av --delete static/ react-sc/src-tauri/static/
 
       - name: Commit e push
         run: |
