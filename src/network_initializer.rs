@@ -6,7 +6,6 @@ use rustbusters_drone::RustBustersDrone;
 use server::utils::traits::Runnable;
 use server::{RustBustersServer, RustBustersServerController};
 use simulation_controller::RustBustersSimulationController;
-use std::any::Any;
 use std::collections::HashMap;
 use std::net::Ipv4Addr;
 use std::{env, fs, thread};
