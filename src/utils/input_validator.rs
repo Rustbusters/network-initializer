@@ -4,25 +4,11 @@ use wg_2024::config::{Config};
 use wg_2024::network::NodeId;
 
 pub fn validate_config(config: &Config) -> Result<(), String> {
-    if let Err(message) = check_uniqueness_of_ids(config) {
-        return Err(message)
-    }
-
-    if let Err(message) = check_drones(config) {
-        return Err(message)
-    }
-
-    if let Err(message) = check_servers(config) {
-        return Err(message)
-    }
-
-    if let Err(message) = check_clients(config) {
-        return Err(message)
-    }
-
-    if let Err(message) = check_connections(config) {
-        return Err(message)
-    }
+    check_uniqueness_of_ids(config)?;
+    check_drones(config)?;
+    check_servers(config)?;
+    check_clients(config)?;
+    check_connections(config)?;
 
     Ok(())
 }
@@ -100,7 +86,7 @@ fn check_clients(config: &Config) -> Result<(), String> {
             }
         }
 
-        if client.connected_drone_ids.len() < 1 || client.connected_drone_ids.len() > 2 {
+        if client.connected_drone_ids.is_empty() || client.connected_drone_ids.len() > 2 {
             return Err(format!("Client {} has less than 1 connection or more than 2", client.id))
         }
     }
@@ -112,37 +98,37 @@ fn check_connections(config: &Config) -> Result<(), String> {
     let mut nodes_connections: HashMap<NodeId, Vec<NodeId>> = HashMap::new();
 
     for drone in &config.drone {
-        if !nodes_connections.contains_key(&drone.id) {
-            nodes_connections.insert(drone.id, drone.connected_node_ids.clone());
+        if let std::collections::hash_map::Entry::Vacant(e) = nodes_connections.entry(drone.id) {
+            e.insert(drone.connected_node_ids.clone());
         } else {
             return Err("Duplicated id".to_string())
         }
+
     }
 
     for server in &config.server {
-        if !nodes_connections.contains_key(&server.id) {
-            nodes_connections.insert(server.id, server.connected_drone_ids.clone());
+        if let std::collections::hash_map::Entry::Vacant(e) = nodes_connections.entry(server.id) {
+            e.insert(server.connected_drone_ids.clone());
         } else {
             return Err("Duplicated id".to_string())
         }
     }
 
     for client in &config.client {
-        if !nodes_connections.contains_key(&client.id) {
-            nodes_connections.insert(client.id, client.connected_drone_ids.clone());
+        if let std::collections::hash_map::Entry::Vacant(e) = nodes_connections.entry(client.id) {
+            e.insert(client.connected_drone_ids.clone());
         } else {
             return Err("Duplicated id".to_string())
         }
+
     }
 
     for key in nodes_connections.keys() {
         for id in nodes_connections.get(key).unwrap().iter() {
             if !nodes_connections.contains_key(id) {
                 return Err(format!("Connection to a node that does not exists! From {} to {}", key, id));
-            } else {
-                if !nodes_connections.get(id).unwrap().contains(&key) {
-                    return Err(format!("Trying to establish a mono-directional connection! From {} to {}", key, id));
-                }
+            } else if !nodes_connections.get(id).unwrap().contains(key) {
+                return Err(format!("Trying to establish a mono-directional connection! From {} to {}", key, id));
             }
         }
     }
@@ -159,10 +145,8 @@ fn check_ids(ids: &Vec<NodeId>, node_id: NodeId) -> Result<(), NodeId> {
     for id in ids {
         if node_id == *id {
             return Err(node_id)
-        } else {
-            if !set.insert(id) {
-                return Err(*id)
-            }
+        } else if !set.insert(id) {
+            return Err(*id)
         }
     }
 
@@ -171,7 +155,7 @@ fn check_ids(ids: &Vec<NodeId>, node_id: NodeId) -> Result<(), NodeId> {
 
 // Check that pdr is in the right range [0 - 1]
 fn check_pdr_value(pdr: f32) -> Result<(), ()> {
-    if pdr < 0. || pdr > 1. {
+    if !(0. ..=1.).contains(&pdr) {
         Err(())
     } else {
         Ok(())

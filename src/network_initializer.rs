@@ -2,7 +2,7 @@ use client::RustbustersClient;
 use common_utils::{HostCommand, HostEvent};
 use crossbeam_channel::{unbounded, Receiver, Sender};
 use log::{error, info};
-use rustbusters_drone::RustBustersDrone;
+// use rustbusters_drone::RustBustersDrone;
 use server::utils::traits::Runnable;
 use server::{RustBustersServer, RustBustersServerController};
 use simulation_controller::RustBustersSimulationController;
@@ -20,16 +20,16 @@ use crate::{drone_factories, utils};
 use dotenv::dotenv;
 
 // DRONES
-/*use ap2024_unitn_cppenjoyers_drone::CppEnjoyersDrone;
+use rusty_drones::RustyDrone;
+use ap2024_unitn_cppenjoyers_drone::CppEnjoyersDrone;
 use fungi_drone::FungiDrone;
 use lockheedrustin_drone::LockheedRustin;
 use rust_do_it::RustDoIt;
 use rust_roveri::RustRoveri;
 use rustastic_drone::RustasticDrone;
 use rusteze_drone::RustezeDrone;
-use rusty_drones::RustyDrone;
 use wg_2024_rust::drone::RustDrone;
-use RF_drone::RustAndFurious;*/
+use RF_drone::RustAndFurious;
 
 pub struct NetworkInitializer {
     drone_ids: Vec<NodeId>,
@@ -41,6 +41,7 @@ pub struct NetworkInitializer {
     server_controller_channels: HashMap<NodeId, (Sender<HostCommand>, Receiver<HostEvent>)>,
     handles: Vec<thread::JoinHandle<()>>,
     config: Option<Config>,
+    drone_groups: HashMap<NodeId, String>,
 }
 
 impl NetworkInitializer {
@@ -55,6 +56,7 @@ impl NetworkInitializer {
             server_controller_channels: HashMap::new(),
             handles: Vec::new(),
             config: None,
+            drone_groups: HashMap::new(),
         }
     }
 
@@ -78,7 +80,7 @@ impl NetworkInitializer {
         if let Err(error_message) = utils::input_validator::validate_config(&config) {
             error!("{}", error_message);
             println!("ERROR: {}", error_message);
-            return ();
+            return;
         }
 
         self.config = Some(config);
@@ -119,9 +121,9 @@ impl NetworkInitializer {
             info!("Creating and spawning Drones");
 
             let drone_factories: Vec<DroneFactory> = drone_factories![
-                RustBustersDrone,
+                // RustBustersDrone,
                 // TODO: Remove RustBustersDrone
-                /*RustyDrone,
+                RustyDrone,
                 LockheedRustin,
                 FungiDrone,
                 RustasticDrone,
@@ -130,7 +132,7 @@ impl NetworkInitializer {
                 RustRoveri,
                 RustAndFurious,
                 CppEnjoyersDrone,
-                RustDrone,*/
+                RustDrone,
             ];
             let mut factory_index = 0;
 
@@ -166,6 +168,8 @@ impl NetworkInitializer {
                     packet_send,
                     drone.pdr,
                 );
+
+                self.drone_groups.insert(drone.id, new_drone.drone_type().to_owned());
                 info!("Type of Drone {}: {}", drone.id, new_drone.drone_type());
 
                 let handle = thread::spawn(move || {
@@ -338,7 +342,6 @@ impl NetworkInitializer {
             let server_ui_url = format!("http:/{}:{}", ip_str, port);
             info!("Creating and spawning Simulation Controller");
             let params = simulation_controller::SimulationControllerParams {
-                handles: self.handles,
                 node_channels: self.intra_node_channels,
                 drone_controller_channels: self.drone_controller_channels.clone(),
                 client_controller_channels: self.client_controller_channels.clone(),
@@ -347,6 +350,7 @@ impl NetworkInitializer {
                 clients: config.client.clone(),
                 servers: config.server.clone(),
                 server_ui_url,
+                drone_groups: self.drone_groups.clone(),
             };
             let sim_controller = RustBustersSimulationController::new(params);
 
@@ -357,9 +361,9 @@ impl NetworkInitializer {
 
             // Wait for all the childs to terminate before terminating the whole program
             // info!("Waiting the end of execution of the nodes");
-            // for handle in handles {
+            // for handle in self.handles {
             //     match handle.join() {
-            //         Ok(_) => debug!("Successfully joined the nodes"),
+            //         Ok(_) => println!("Successfully joined the nodes"),
             //         Err(e) => error!("Failed to join the nodes: {:?}", e),
             //     }
             // }

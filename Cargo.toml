@@ -6,27 +6,27 @@ edition = "2021"
 [dependencies]
 wg_2024 = { git = "https://github.com/WGL-2024/WGL_repo_2024.git", features = ["serialize"] }
 
-simulation-controller = { git = "https://github.com/Rustbusters/simulation-controller.git" }
+#simulation-controller = { git = "https://github.com/Rustbusters/simulation-controller.git" }
 client = { git = "https://github.com/Rustbusters/client.git" }
 server = { git = "https://github.com/Rustbusters/server.git" }
 common-utils = { git = "https://github.com/Rustbusters/common-utils.git" }
 
 # DRONES
 # TODO: Remove our drone and add the other drones
-rustbusters-drone = { git = "https://github.com/Rustbusters/drone.git" }
-# rusty_drones = { git = "https://github.com/rusty-drone-2024/rusty-drone" }
-# lockheedrustin-drone = { git = "https://github.com/Lockheed-Rustin/drone.git" }
-# fungi_drone = { git = "https://github.com/Fungi-B-D/Fungi-Drone.git" }
-# rustastic-drone = { git = "https://github.com/Rustastic/RustasticDrone.git" }
-# rusteze_drone = { git = "https://github.com/Rusteze-AP/drone.git" }
-# rust_do_it = { git = "https://github.com/RustDoIt/Drone.git" }
-# rust-roveri = { git = "https://github.com/RustRoveri/rust-roveri.git" }
-# RF_drone = { git = "https://github.com/RustAndFurious/RF_drone.git" }
-# ap2024_unitn_cppenjoyers_drone = { git = "https://github.com/Cpp-enjoyers/drone.git" }
-# wg_2024-rust = { git = "https://github.com/LuigiMiazzo17/unitn-advancedProgramming-WGL_2024-drone.git" }
+#rustbusters-drone = { git = "https://github.com/Rustbusters/drone.git" }
+ rusty_drones = { git = "https://github.com/rusty-drone-2024/rusty-drone" }
+ lockheedrustin-drone = { git = "https://github.com/Lockheed-Rustin/drone.git" }
+ fungi_drone = { git = "https://github.com/Fungi-B-D/Fungi-Drone.git" }
+ rustastic-drone = { git = "https://github.com/Rustastic/RustasticDrone.git" }
+ rusteze_drone = { git = "https://github.com/Rusteze-AP/drone.git" }
+ rust_do_it = { git = "https://github.com/RustDoIt/Drone.git" }
+ rust-roveri = { git = "https://github.com/RustRoveri/rust-roveri.git" }
+ RF_drone = { git = "https://github.com/RustAndFurious/RF_drone.git" }
+ ap2024_unitn_cppenjoyers_drone = { git = "https://github.com/Cpp-enjoyers/drone.git" }
+ wg_2024-rust = { git = "https://github.com/LuigiMiazzo17/unitn-advancedProgramming-WGL_2024-drone.git" }
 
 
-# simulation-controller = { path = "../simulation-controller" }
+ simulation-controller = { path = "../simulation-controller" }
 # rustbusters-drone = { path = "../drone" }
 # client = { path = "../client" }
 # server = { path = "../server" }
