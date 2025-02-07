@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 wg_2024 = { git = "https://github.com/WGL-2024/WGL_repo_2024.git", features = ["serialize"] }
 
-#simulation-controller = { git = "https://github.com/Rustbusters/simulation-controller.git" }
+simulation-controller = { git = "https://github.com/Rustbusters/simulation-controller.git" }
 client = { git = "https://github.com/Rustbusters/client.git" }
 server = { git = "https://github.com/Rustbusters/server.git" }
 common-utils = { git = "https://github.com/Rustbusters/common-utils.git" }
@@ -26,7 +26,7 @@ common-utils = { git = "https://github.com/Rustbusters/common-utils.git" }
  wg_2024-rust = { git = "https://github.com/LuigiMiazzo17/unitn-advancedProgramming-WGL_2024-drone.git" }
 
 
- simulation-controller = { path = "../simulation-controller" }
+# simulation-controller = { path = "../simulation-controller" }
 # rustbusters-drone = { path = "../drone" }
 # client = { path = "../client" }
 # server = { path = "../server" }
