@@ -12,11 +12,13 @@ use wg_2024::packet::Packet;
 pub trait DroneRunnable: Send {
     fn run(&mut self);
     fn drone_type(&self) -> &'static str;
+    fn as_any(&self) -> &dyn std::any::Any;
+    fn as_any_mut(&mut self) -> &mut dyn std::any::Any;
 }
 
 /// Blanket impl: any `T` that implements `wg_2024::drone::Drone + Send`
 /// automatically implements `DroneRunnable`.
-impl<T: Drone + Send> DroneRunnable for T {
+impl<T: Drone + Send + 'static> DroneRunnable for T {
     fn run(&mut self) {
         <Self as Drone>::run(self);
     }
@@ -27,6 +29,16 @@ impl<T: Drone + Send> DroneRunnable for T {
             .split("::")
             .last()
             .unwrap_or("Unknown")
+    }
+
+    /// Returns a reference to the `Any` trait object for this drone.
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+
+    /// Returns a mutable reference to the `Any` trait object for this drone.
+    fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
+        self
     }
 }
 

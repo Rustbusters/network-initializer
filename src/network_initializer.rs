@@ -160,7 +160,7 @@ impl NetworkInitializer {
                 let create_drone = &drone_factories[factory_index];
                 factory_index = (factory_index + 1) % drone_factories.len();
 
-                let new_drone = create_drone(
+                let mut new_drone = create_drone(
                     drone.id,
                     drone_to_controller_sender, // The drone can send events here
                     drone_from_controller_receiver, // The drone receives commands here
@@ -168,6 +168,16 @@ impl NetworkInitializer {
                     packet_send,
                     drone.pdr,
                 );
+
+                if new_drone.drone_type() == "FungiDrone" {
+                    let fungi_drone = new_drone.as_any_mut().downcast_mut::<FungiDrone>().unwrap();
+                    fungi_drone.set_debug_print();     // Enables Debug Print
+                    fungi_drone.disable_request_log(); // Disables Flood Request Log
+                }
+                else if new_drone.drone_type() == "RustezeDrone" {
+                    let rusteze_drone = new_drone.as_any_mut().downcast_mut::<RustezeDrone>().unwrap();
+                    rusteze_drone.with_all(); // Enable all levels
+                }
 
                 self.drone_groups.insert(drone.id, new_drone.drone_type().to_owned());
                 info!("Type of Drone {}: {}", drone.id, new_drone.drone_type());
