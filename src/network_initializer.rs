@@ -30,6 +30,7 @@ use rustastic_drone::RustasticDrone;
 use rusteze_drone::RustezeDrone;
 use wg_2024_rust::drone::RustDrone;
 use RF_drone::RustAndFurious;
+use rustbusters_drone::RustBustersDrone;
 
 pub struct NetworkInitializer {
     drone_ids: Vec<NodeId>,
@@ -120,20 +121,31 @@ impl NetworkInitializer {
             // Set up each drone
             info!("Creating and spawning Drones");
 
-            let drone_factories: Vec<DroneFactory> = drone_factories![
-                // RustBustersDrone,
-                // TODO: Remove RustBustersDrone
-                RustyDrone,
-                LockheedRustin,
-                FungiDrone,
-                RustasticDrone,
-                RustezeDrone,
-                RustDoIt,
-                RustRoveri,
-                RustAndFurious,
-                CppEnjoyersDrone,
-                RustDrone,
-            ];
+            // Ask which type of drones will be used
+            let mode = env::var("RUSTBUSTERS_MODE")
+                .expect("RUSTBUSTERS_MODE must be set in .env file")
+                .parse::<bool>()
+                .expect("RUSTBUSTERS_MODE must be a valid boolean value");
+
+            let drone_factories: Vec<DroneFactory> = if mode {
+                drone_factories![
+                    RustBustersDrone
+                ]
+            } else {
+                drone_factories![
+                    RustyDrone,
+                    LockheedRustin,
+                    FungiDrone,
+                    RustasticDrone,
+                    RustezeDrone,
+                    RustDoIt,
+                    RustRoveri,
+                    RustAndFurious,
+                    CppEnjoyersDrone,
+                    RustDrone,
+                ]
+            };
+
             let mut factory_index = 0;
 
             for drone in config.drone.clone() {
