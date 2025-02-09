@@ -13,7 +13,7 @@ common-utils = { git = "https://github.com/Rustbusters/common-utils.git" }
 
 # DRONES
 # TODO: Remove our drone and add the other drones
-# rustbusters-drone = { git = "https://github.com/Rustbusters/drone.git" }
+rustbusters-drone = { git = "https://github.com/Rustbusters/drone.git" }
 rusty_drones = { git = "https://github.com/rusty-drone-2024/rusty-drone" }
 lockheedrustin-drone = { git = "https://github.com/Lockheed-Rustin/drone.git" }
 fungi_drone = { git = "https://github.com/Fungi-B-D/Fungi-Drone.git" }
